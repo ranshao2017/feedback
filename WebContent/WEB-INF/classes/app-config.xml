@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+	<!-- 注入所有的类对象，过滤掉Controller，在web.xml中指定了该文件用ContextLoaderListener方式加载 -->
+	<context:component-scan base-package="com.sense">
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!-- 支持 @AspectJ 标记-->
+	<aop:aspectj-autoproxy />
+	
+	<!-- 加载jdbc.properties中的配置信息 -->
+	<context:property-placeholder location="classpath:jdbc.properties" file-encoding="UTF-8"/>
+	
+	<bean id="propertiesReader" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+          <property name="fileEncoding" value="UTF-8"></property>
+		  <property name="locations">
+			   <list>
+				    <value>classpath:app-constant.properties</value>
+			   </list>
+		  </property>
+   </bean>
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<property name="user" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+
+		<!--连接池中保留的最小连接数。 -->
+		<property name="minPoolSize" value="2" />
+		<!--连接池中保留的最大连接数。Default: 15 -->
+		<property name="maxPoolSize" value="100" />
+		<property name="maxStatements" value="0"/>
+		<!--初始化时获取连接数，取值应在minPoolSize与maxPoolSize之间 -->
+		<property name="initialPoolSize" value="2" />
+		<!--最大空闲时间,1800秒内未使用则连接被丢弃。若为0则永不丢弃。Default: 0 -->
+		<property name="maxIdleTime" value="300" />
+		<!--当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default: 3 -->
+		<property name="acquireIncrement" value="3" />
+		<!--每60秒检查所有连接池中的空闲连接。Default: 0 -->
+		<property name="idleConnectionTestPeriod" value="60" />
+	</bean>
+
+	<bean id="senseFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<!-- hibernate注解使用，加上该配置后可以不用@Column -->
+		<property name="namingStrategy">
+			<bean class="org.hibernate.cfg.ImprovedNamingStrategy"/>
+		</property>
+		<!-- 扫描hibernate映射对应的实体类 -->
+		<property name="packagesToScan" >
+			<list>
+        		<value>com.sense.sys.entity</value>
+        		<value>com.sense.feedback.entity</value>
+    		</list>
+		</property>
+		
+		<property name="hibernateProperties">
+			<value>
+				hibernate.default_schema=${hibernate.default_schema}
+				hibernate.dialect=${hibernate.dialect}
+				hibernate.hbm2ddl.auto=${hibernate.hbm2ddl.auto}
+				hibernate.show_sql=${hibernate.show_sql}
+				hibernate.format_sql=${hibernate.format_sql} 
+				hibernate.cache.use_query_cache=${hibernate.cache.use_second_level_cache}
+				hibernate.connection.autocommit=${hibernate.connection.autocommit}
+				javax.persistence.validation.mode=${javax.persistence.validation.mode}
+			</value>
+		</property>
+	</bean>
+	        
+	<!-- 配置Spring的事务处理 -->
+	<!-- 创建事务管理器-->
+	<bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="senseFactory" />
+	</bean>
+	<!-- 配置哪些方法要加入事务控制 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<!--
+				hibernate4必须配置为开启事务 否则 getCurrentSession()获取不到
+				统一编码规范，所有查询都必须以 get 开头
+			 -->	
+			<tx:method name="forward*" propagation="REQUIRED" read-only="true"/>
+			<tx:method name="get*" propagation="REQUIRED" read-only="true"/>
+			<tx:method name="query*" propagation="REQUIRED" read-only="true"/>
+			<!-- 让其他所有的方法都加入事务管理 -->
+			<tx:method name="*" propagation="REQUIRED" rollback-for="Exception"/>
+		</tx:attributes>
+	</tx:advice>
+	<!-- 配置AOP，Spring是通过AOP来进行事务管理的 -->
+	<aop:config>
+		<!-- 设置pointCut只对service层添加事务 -->
+		<aop:pointcut id="allMethods" expression="execution(public * com..BaseService+.*(..)))" />
+		<!-- 通过advisor来确定具体要加入事务控制的方法 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allMethods" />
+	</aop:config>
+	
+	<task:annotation-driven />
+	
+	<!-- 配置Activiti工作流 -->
+	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">	   
+	    <property name="dataSource" ref="dataSource" />
+	    <property name="databaseSchemaUpdate" value="false" />
+	    <property name="transactionManager" ref="txManager" /> 
+	    <property name="jobExecutorActivate" value="false" />
+        <property name="databaseSchema" value="dbo" />
+        <property name="tablePrefixIsSchema" value="true" />
+        <property name="databaseTablePrefix" value="" />
+	    <property name="deploymentResources" value="classpath*:/diagrams/*.bpmn"/>
+	    <property name="deploymentMode" value="single-resource" />
+		<property name="activityFontName" value="宋体"/>
+		<property name="labelFontName" value="宋体"/>
+	</bean>
+	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean"> 
+	  <property name="processEngineConfiguration" ref="processEngineConfiguration" /> 
+	</bean>
+    <!-- 创建activiti提供的各种服务 -->
+	<!-- 工作流仓储服务 -->
+	<bean id="repositoryService" factory-bean="processEngine" factory-method="getRepositoryService" />
+	<!-- 工作流运行服务 -->
+	<bean id="runtimeService" factory-bean="processEngine" factory-method="getRuntimeService" />
+	<!-- 工作流表单服务 -->
+	<bean id="formService" factory-bean="processEngine" factory-method="getFormService" />
+	<!-- 工作流任务服务 -->
+	<bean id="taskService" factory-bean="processEngine" factory-method="getTaskService" />
+	<!-- 工作流历史数据服务 -->
+	<bean id="historyService" factory-bean="processEngine" factory-method="getHistoryService" />
+	<!-- 工作流管理服务 -->
+	<bean id="managementService" factory-bean="processEngine" factory-method="getManagementService" />
+	<!-- 工作流唯一服务 -->
+	<bean id="identityService" factory-bean="processEngine" factory-method="getIdentityService" />
+</beans>

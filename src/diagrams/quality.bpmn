@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="quality" name="质量问题反馈流程" isExecutable="true">
+    <extensionElements>
+      <activiti:executionListener event="end" class="com.sense.feedback.workflow.handler.ExecuteEndHandler"></activiti:executionListener>
+    </extensionElements>
+    <startEvent id="startevent1" name="开始"></startEvent>
+    <userTask id="quality_add" name="发起">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.sense.feedback.workflow.handler.FirstUserTaskHandler"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="quality_add"></sequenceFlow>
+    <userTask id="quality_review" name="评审" activiti:formKey="workflow/forwardCommTask.do">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.sense.feedback.workflow.handler.CandidateHandler"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow2" sourceRef="quality_add" targetRef="quality_review"></sequenceFlow>
+    <userTask id="quality_solve" name="解决" activiti:formKey="workflow/forwardCommTask.do">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.sense.feedback.workflow.handler.CandidateHandler"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow3" name="通过" sourceRef="quality_review" targetRef="quality_solve">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${outCome=='通过'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="quality_valid" name="验证" activiti:formKey="workflow/forwardCommTask.do">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.sense.feedback.workflow.handler.CandidateHandler"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow4" sourceRef="quality_solve" targetRef="quality_valid"></sequenceFlow>
+    <sequenceFlow id="flow5" name="不通过" sourceRef="quality_valid" targetRef="quality_solve">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${outCome=='不通过'}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="结束"></endEvent>
+    <sequenceFlow id="flow6" name="通过" sourceRef="quality_valid" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${outCome=='通过'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow7" name="不通过" sourceRef="quality_review" targetRef="endevent1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${outCome=='不通过'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_quality">
+    <bpmndi:BPMNPlane bpmnElement="quality" id="BPMNPlane_quality">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="70.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="quality_add" id="BPMNShape_quality_add">
+        <omgdc:Bounds height="55.0" width="105.0" x="130.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="quality_review" id="BPMNShape_quality_review">
+        <omgdc:Bounds height="55.0" width="105.0" x="270.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="quality_solve" id="BPMNShape_quality_solve">
+        <omgdc:Bounds height="55.0" width="105.0" x="450.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="quality_valid" id="BPMNShape_quality_valid">
+        <omgdc:Bounds height="55.0" width="105.0" x="450.0" y="149.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="485.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="105.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="130.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="235.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="375.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="77.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="24.0" x="385.0" y="81.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="502.0" y="105.0"></omgdi:waypoint>
+        <omgdi:waypoint x="502.0" y="149.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="555.0" y="176.0"></omgdi:waypoint>
+        <omgdi:waypoint x="600.0" y="177.0"></omgdi:waypoint>
+        <omgdi:waypoint x="600.0" y="123.0"></omgdi:waypoint>
+        <omgdi:waypoint x="600.0" y="76.0"></omgdi:waypoint>
+        <omgdi:waypoint x="555.0" y="77.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="36.0" x="559.0" y="109.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="502.0" y="204.0"></omgdi:waypoint>
+        <omgdi:waypoint x="502.0" y="260.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="24.0" x="511.0" y="228.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="322.0" y="105.0"></omgdi:waypoint>
+        <omgdi:waypoint x="322.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="485.0" y="277.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="14.0" width="100.0" x="331.0" y="169.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

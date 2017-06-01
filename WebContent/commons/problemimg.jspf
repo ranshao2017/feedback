@@ -1,0 +1,126 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<script type="text/javascript" src="${app}/static/js/abigimage.jquery.js?v=11"></script>
+<script type="text/javascript">
+	var imgPathArr = new Array();
+	
+	function setImgPath(imgPath){
+		imgPathArr.push(imgPath);
+		loadUploadImage();
+	}
+	
+	function loadDescImage(){
+		if(imgPathArr.length == 0) return;
+		var imgHtmlStr = "";
+		imgHtmlStr += "<table style='text-align:left;float:left;' cellspacing='8'>";
+		imgHtmlStr += 	"<tr>";
+		for (var i = 0; i < imgPathArr.length; i ++){
+			imgHtmlStr += createDescHtml(imgPathArr[i], imgPathArr.length + "-" + (i + 1));
+		}
+		imgHtmlStr += "</tr></table>";
+		$('#imgDiv').html(imgHtmlStr);
+		
+		var parentWidth = $(window.top.document).width();
+		var parentHeigh = $(window.top.document).height();
+		$('a.bigImg-class').abigimage({
+			 stickToParentBody:true,
+			 imgAreaMaxWidth:parentWidth,
+			 imgAreaMaxHeight:parentHeigh
+	    });
+	}
+	function createDescHtml(picPath, filexh){
+		var htmlstr ="";
+		if (picPath){
+			htmlstr += "<td align='center' valign='top' style='border:1px solid #eee;'>";
+			htmlstr +=      '<a class="bigImg-class" style="border:0px;" href="${app}/problem/showPic.do?imgPath=' + picPath + '">';
+			htmlstr += 			'<img src="${app}/problem/showPic.do?imgPath=' + picPath + '" style="height:150px;"/>';
+			htmlstr +=      '</a>';
+			htmlstr += 		"<br>";
+			htmlstr +=		'<span style="border-style:none;margin: 0px 2px;">' + filexh + '</span>';
+			htmlstr +=	"</td>";
+		}
+		return htmlstr;
+	}
+	
+	function loadUploadImage(){
+		if(imgPathArr.length == 0) return;
+		$("#imgPath").val(imgPathArr.join(","));
+		
+		var imgHtmlStr = "";
+		imgHtmlStr += "<table style='text-align:left;float:left;' cellspacing='8'>";
+		imgHtmlStr += 	"<tr>";
+		for (var i = 0; i < imgPathArr.length; i ++){
+			imgHtmlStr += createOneEfileHtml(imgPathArr[i], imgPathArr.length + "-" + (i + 1));
+		}
+		imgHtmlStr += "</tr></table>";
+		$('#imgDiv').html(imgHtmlStr);
+		
+		var parentWidth = $(window.top.document).width();
+		var parentHeigh = $(window.top.document).height();
+		$('a.bigImg-class').abigimage({
+			 stickToParentBody:true,
+			 imgAreaMaxWidth:parentWidth,
+			 imgAreaMaxHeight:parentHeigh
+	    });
+	}
+	function createOneEfileHtml(picPath, filexh){
+		var htmlstr ="";
+		if (picPath){
+			htmlstr += "<td align='center' valign='top' style='border:1px solid #eee;'>";
+			htmlstr +=      '<a class="bigImg-class" style="border:0px;" href="${app}/problem/showPicA.do?imgPath=' + picPath + '">';
+			htmlstr += 			'<img src="${app}/problem/showPic.do?imgPath=' + picPath + '" style="height:150px;"/>';
+			htmlstr +=      '</a>';
+			htmlstr += 		"<br>";
+			htmlstr +=		'<span style="border-style:none;margin: 0px 2px;">' + filexh + '</span>';
+			htmlstr +=		"<br>";
+			htmlstr += 		'<a style="border-style: none;margin: 0px 5px;" href="#" onclick="forwardVouPath(\'' + picPath + '\')"><img src="${app}/static/images/prevpage.png" style="width:15px;height:15px;border-style:none;"/></a>';
+			htmlstr +=		'<a style="border-style: none;margin: 0px 5px;" href="#" onclick="removeVouPath(\'' + picPath + '\')"><img src="${app}/static/images/close.png" style="width:15px;height:15px;border-style:none;"/></a>';
+			htmlstr +=		'<a style="border-style: none;margin: 0px 5px;" href="#" onclick="backwardVouPath(\'' + picPath + '\')"><img src="${app}/static/images/nextpage.png" style="width:15px;height:15px;border-style:none;"/></a>';
+			htmlstr +=	"</td>";
+		}
+		return htmlstr;
+	}
+	//删除指定文件
+	function removeVouPath(vouPath){
+		var deleteIndex = 0;
+		for(var i = 0; i < imgPathArr.length; i ++){
+			if(vouPath == imgPathArr[i]){
+				deleteIndex = i;
+				break;
+			}
+		}
+		imgPathArr.splice(deleteIndex, 1);
+		loadUploadImage();
+	}
+	//将指定的文件前移一位
+	function forwardVouPath(vouPath){
+		var tempVouPath = "";
+		for(var i = 0; i < imgPathArr.length; i ++){
+			if(vouPath == imgPathArr[i]){
+				if(i == 0){
+					return;
+				}
+				tempVouPath = imgPathArr[i - 1];
+				imgPathArr[i - 1] = imgPathArr[i];
+				imgPathArr[i] = tempVouPath;
+				break;
+			}
+		}
+		loadUploadImage();
+	}
+	//将指定的文件后移一位
+	function backwardVouPath(vouPath){
+		var tempVouPath = "";
+		for(var i = 0; i < imgPathArr.length; i ++){
+			if(vouPath == imgPathArr[i]){
+				if(i == imgPathArr.length - 1){
+					return;
+				}
+				tempVouPath = imgPathArr[i + 1];
+				imgPathArr[i + 1] = imgPathArr[i];
+				imgPathArr[i] = tempVouPath;
+				break;
+			}
+		}
+		loadUploadImage(fileTypeID);
+	}
+</script>

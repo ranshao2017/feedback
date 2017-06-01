@@ -1,0 +1,27 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<c:set var="app" value="<%=request.getContextPath()%>" />
+
+<link rel="stylesheet" type="text/css" href="${app}/static/easyui/themes/gray/easyui.css">
+<link rel="stylesheet" type="text/css" href="${app}/static/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="${app}/static/css/sense.css">
+
+<script type="text/javascript" src="${app}/static/js/control.js?v=62"></script>
+<script type="text/javascript" src="${app}/static/js/javascript-extends.js?v=2"></script>
+<script type="text/javascript" src="${app}/static/js/SfzhmUtil.js"></script>
+<script type="text/javascript" src="${app}/static/js/PinyinUtil.js"></script>
+<script type="text/javascript" src="${app}/static/js/json.js"></script>
+
+<script type="text/javascript" src="${app}/static/js/jquery-1.8.0.min.js"></script>
+
+<script type="text/javascript" src="${app}/static/easyui/jquery.easyui.min.js?v=10"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-combobox.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datagrid-groupview.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datagrid.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-form.js?v=47"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-tree.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-validatebox.js"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datebox.js?v=4"></script>
