@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>接车下线管理</title>
+<title>不可调车管理</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ include file="/commons/head.jspf"%>
 </head>
@@ -12,13 +12,14 @@
 		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
 			<input title="订单号" name="ddh"/>
-			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryPC()">检索</a>
+			<input type="hidden" name="status" value="${status }"/>
+			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
 	</div>
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010101" class="easyui-linkbutton" iconCls="icon-tab" plain="true" onclick="pickcar()">接车</a>
+           		<a id="0ZCTS010601" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="pctcar()">调车处理</a>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -65,7 +66,7 @@
 				field : "ddh",
 				width : 60,
 				title : "订单号"
-			}, {
+			},{
 				field : "xxsj",
 				width : 80,
 				title : "下线时间"
@@ -75,8 +76,20 @@
 				title : "发动机"
 			},{
 				field : "pz",
-				width : 250,
+				width : 150,
 				title : "配置"
+			},{
+				field : "qjFlag",
+				width : 50,
+				title : "是否缺件",
+				formatter:ctrl.dicConvert('YESNO') 
+			},{
+				field : "bz",
+				width : 100,
+				title : "备注"
+			},{
+				field : "status",
+				hidden : true
 			} ] ],
 			onClickCell:function(rowIndex, field, value){
 				if('pz' == field){
@@ -85,29 +98,28 @@
 				}
 			},
 			onDblClickRow:function(rowIndex, rowData){
-				pickcar();
+				pctcar();
 			}
 		});
 		
-		setTimeout('queryPC()', 200);
+		setTimeout('queryCT()', 200);
 	}
 	
-	function queryPC(){
+	function queryCT(){
 	    var param = $("#queryForm").form("getData");
-	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryPCPage.do";
+	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryCTPage.do";
 	    $('#pc_DG').datagrid("load", param);
 	    $('#pc_DG').datagrid("clearSelections");
 	}
 	
-	function pickcar(){
+	function pctcar(){
 		var proRow = $("#pc_DG").datagrid("getSelected");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
-		var url = '${app}/cartest/forwardPickCar.do';
-		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 480, "接车");
+		var url = '${app}/cartest/forwardPCTCar.do';
+		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 450, "调车处理");
 	}
-	
 </script>
 </html>

@@ -9,8 +9,9 @@
 </head>
 <body class="easyui-layout">
 	<div region="north" border="false">
-		<form id="queryForm" columns='2' class="easyui-form">
+		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
+			<input title="订单号" name="ddh"/>
 			<input type="hidden" name="xzOrgID" value="${xzOrgID }">
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryRepo()">检索</a>
 		</form>
@@ -51,10 +52,17 @@
 			pageSize : 30,
 			pageList : [ 30,50,100 ],
 			columns : [ [  {
+				field : "dph",
+				width : 60,
+				title : "底盘号"
+			},{
 				field : "scdh",
 				width : 70,
-				title : "随车单号",
-				hidden:true
+				title : "随车单号"
+			},{
+				field : "cx",
+				width : 90,
+				title : "车型"
 			},{
 				field : "ddh",
 				width : 60,
@@ -64,14 +72,6 @@
 				width : 50,
 				title : "状态",
 				formatter:ctrl.dicConvert('PROCNODE')
-			},{
-				field : "cx",
-				width : 90,
-				title : "车型"
-			}, {
-				field : "dph",
-				width : 60,
-				title : "底盘号"
 			}, {
 				field : "xxsj",
 				width : 80,
@@ -94,9 +94,14 @@
 				width : 100,
 				title : "备注"
 			} ] ],
+			onClickCell:function(rowIndex, field, value){
+				if('pz' == field){
+					$('#pzForm [name=pz]').text(value);
+					$('#pz_div').window('open');
+				}
+			},
 			onDblClickRow:function(rowIndex, rowData){
-				$('#pzForm').form('setData', rowData);
-				$('#pz_div').window('open');
+				repoInfo();
 			}
 		});
 		

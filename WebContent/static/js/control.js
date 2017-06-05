@@ -141,7 +141,6 @@ ctrl.openWin = (function() {
 				maximizable : false,
 				cache : false,
 				resizable : false,
-				draggable : false,
 				closable : closableMark
 			});
 		}

@@ -212,7 +212,7 @@ public class CarTestController extends BaseController {
 	@RequestMapping("/forwardUnTC")
 	public String forwardUnTC(HttpServletRequest request, ModelMap map) throws Exception {
 		map.put("status", EnumProcNode.jc.getCode());
-		return "cartest/cartmange";	
+		return "cartest/unpickcartm";	
 	}
 	
 	/**
@@ -228,7 +228,7 @@ public class CarTestController extends BaseController {
 			String qjJson = carTestService.queryQJData(scdh);
 			map.put("qjJson", qjJson);
 		}
-		return "cartest/unpickcarm";
+		return "cartest/unpickcar";
 	}
 	
 	/**

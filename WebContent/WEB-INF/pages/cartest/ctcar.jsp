@@ -20,7 +20,7 @@
 				<div region="south" style="text-align:center;padding:3px;">
 					<a class="easyui-linkbutton" onClick="saveCT(this);" iconCls="icon-save">保 存</a>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<a class="easyui-linkbutton" onClick="submitCT(this);" iconCls="icon-ok">提交至下一班组</a>
+					<a class="easyui-linkbutton" onClick="submitCT(this);" iconCls="icon-ok">${param.nextbtn }</a>
 				</div>
 			</div>
 		</div>

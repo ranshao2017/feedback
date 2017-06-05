@@ -9,8 +9,9 @@
 </head>
 <body class="easyui-layout">
 	<div region="north" border="false">
-		<form id="queryForm" columns='2' class="easyui-form">
+		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
+			<input title="订单号" name="ddh"/>
 			<input type="hidden" name="status" value="${status }"/>
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
@@ -18,10 +19,9 @@
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('调试')">调试</a>
-           		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('故障排除')">故障排除</a>
-           		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('送验')">送验</a>
-           		<a id="0ZCTS010601" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="pctcar()">调车处理</a>
+           		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('调试','故障排除')">调试</a>
+           		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('故障排除','送验')">故障排除</a>
+           		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('送验','入库')">送验</a>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -53,23 +53,22 @@
 			pageSize : 30,
 			pageList : [ 30,50,100 ],
 			columns : [ [  {
+				field : "dph",
+				width : 60,
+				title : "底盘号"
+			},{
 				field : "scdh",
 				width : 70,
-				title : "随车单号",
-				hidden:true
+				title : "随车单号"
+			},{
+				field : "cx",
+				width : 90,
+				title : "车型"
 			},{
 				field : "ddh",
 				width : 60,
 				title : "订单号"
 			},{
-				field : "cx",
-				width : 90,
-				title : "车型"
-			}, {
-				field : "dph",
-				width : 60,
-				title : "底盘号"
-			}, {
 				field : "xxsj",
 				width : 80,
 				title : "下线时间"
@@ -94,9 +93,20 @@
 				field : "status",
 				hidden : true
 			} ] ],
+			onClickCell:function(rowIndex, field, value){
+				if('pz' == field){
+					$('#pzForm [name=pz]').text(value);
+					$('#pz_div').window('open');
+				}
+			},
 			onDblClickRow:function(rowIndex, rowData){
-				$('#pzForm').form('setData', rowData);
-				$('#pz_div').window('open');
+				if('1' == rowData.status){
+					ctcar('调试','故障排除');
+				}else if('2' == rowData.status){
+					ctcar('故障排除','送验');
+				}else if('3' == rowData.status){
+					ctcar('送验','入库');
+				}
 			}
 		});
 		
@@ -110,24 +120,15 @@
 	    $('#pc_DG').datagrid("clearSelections");
 	}
 	
-	function ctcar(title){
+	function ctcar(title,nextbtn){
 		var proRow = $("#pc_DG").datagrid("getSelected");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
 		var url = '${app}/cartest/forwardCT.do';
-		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 450, title);
+		ctrl.openWin(url, {'scdh':proRow.scdh,'nextbtn':nextbtn}, 650, 450, title);
 	}
 	
-	function pctcar(){
-		var proRow = $("#pc_DG").datagrid("getSelected");
-		if (!proRow) {
-			$.messager.alert("提示", "请先选择一条数据！", "info");
-			return;
-		}
-		var url = '${app}/cartest/forwardPCTCar.do';
-		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 450, "调车处理");
-	}
 </script>
 </html>

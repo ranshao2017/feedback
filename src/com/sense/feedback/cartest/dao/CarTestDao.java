@@ -25,11 +25,15 @@ public class CarTestDao extends BaseDAO {
 		String sql = "select pc.* from BIZ_PC pc where not exists (select 1 from BIZ_PROCINST p where pc.SCDH = p.SCDH)";
 		String scdh = paras.get("scdh");
 		String dph = paras.get("dph");
+		String ddh = paras.get("ddh");
 		if(StringUtils.isNotBlank(scdh)){
 			sql += " and pc.SCDH = :scdh";
 		}
 		if(StringUtils.isNotBlank(dph)){
 			sql += " and pc.DPH = :dph";
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			sql += " and pc.DDH = :ddh";
 		}
 		SQLEntity entity = new SQLEntity(sql);
 		if(StringUtils.isNotBlank(scdh)){
@@ -37,6 +41,9 @@ public class CarTestDao extends BaseDAO {
 		}
 		if(StringUtils.isNotBlank(dph)){
 			entity.setObject("dph", dph);
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			entity.setObject("ddh", ddh);
 		}
 		return executePageQuery(pageInfo, entity, PaiChan.class);
 	}
@@ -59,6 +66,10 @@ public class CarTestDao extends BaseDAO {
 		if(StringUtils.isNotBlank(xzOrgID)){
 			sql.append(" and XZORGID = :xzOrgID");
 		}
+		String ddh = paras.get("ddh");
+		if(StringUtils.isNotBlank(ddh)){
+			sql.append(" and DDH = :ddh");
+		}
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(status)){
 			entity.setObject("status", status);
@@ -71,6 +82,9 @@ public class CarTestDao extends BaseDAO {
 		}
 		if(StringUtils.isNotBlank(xzOrgID)){
 			entity.setObject("xzOrgID", xzOrgID);
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			entity.setObject("ddh", ddh);
 		}
 		return executePageQuery(pageInfo, entity, ProcInst.class);
 	}
