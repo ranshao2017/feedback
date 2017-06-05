@@ -1,0 +1,11 @@
+/app-config.xml
+/app-constant.properties
+/app-version.properties
+/com/
+/diagrams/
+/jasperreports.properties
+/jdbc.properties
+/log4j.xml
+/mvc-config.xml
+/simhei.ttf
+/simsun.ttf
