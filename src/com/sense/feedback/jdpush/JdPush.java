@@ -32,7 +32,7 @@ public class JdPush {
 	public static JPushClient jpushClient = new JPushClient(masterSecret, appKey, TIMES);
 	
     /** 
-     * 推送自定义消息接口 
+     * 推送自定义消息接口 修改
      * @param content 推送内容 
      * @param clientMap <clientType,clientID[]>
      */  
