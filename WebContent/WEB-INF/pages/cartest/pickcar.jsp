@@ -48,10 +48,12 @@
 	
 	$(document).ready(function() {
 		$("#formPickCar").form('setData', pageProc);
+		$('#tabspick').tabs('keyDownTab');
 	});
 	
 	$("#orgCombotree").combotree({
-		lines:true ,
+		lines:true,
+		multiple:true,
 	    url:"${app}/sys/org/queryAllOrgTree.do"
 	});
 	

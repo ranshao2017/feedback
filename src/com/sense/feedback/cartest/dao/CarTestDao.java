@@ -64,7 +64,7 @@ public class CarTestDao extends BaseDAO {
 		}
 		String xzOrgID = paras.get("xzOrgID");
 		if(StringUtils.isNotBlank(xzOrgID)){
-			sql.append(" and XZORGID = :xzOrgID");
+			sql.append(" and XZORGID like :xzOrgID");
 		}
 		String ddh = paras.get("ddh");
 		if(StringUtils.isNotBlank(ddh)){
@@ -81,7 +81,7 @@ public class CarTestDao extends BaseDAO {
 			entity.setObject("dph", dph);
 		}
 		if(StringUtils.isNotBlank(xzOrgID)){
-			entity.setObject("xzOrgID", xzOrgID);
+			entity.setObject("xzOrgID", "%" + xzOrgID + "%");
 		}
 		if(StringUtils.isNotBlank(ddh)){
 			entity.setObject("ddh", ddh);

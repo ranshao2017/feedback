@@ -17,6 +17,7 @@
 <script type="text/javascript" src="${app}/static/js/jquery-1.8.0.min.js"></script>
 
 <script type="text/javascript" src="${app}/static/easyui/jquery.easyui.min.js?v=10"></script>
+
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-combobox.js"></script>
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datagrid-groupview.js"></script>
 <script type="text/javascript" src="${app}/static/easyui/locale/easyui-lang-zh_CN.js"></script>
@@ -25,3 +26,4 @@
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-tree.js"></script>
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-validatebox.js"></script>
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datebox.js?v=4"></script>
+<script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-tab.js"></script>

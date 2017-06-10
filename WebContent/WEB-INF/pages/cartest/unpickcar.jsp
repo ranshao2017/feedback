@@ -49,13 +49,18 @@
 	
 	$(document).ready(function() {
 		$("#formPickCar").form('setData', pageProc);
+		if(pageProc.xzOrgID){
+			$("#orgCombotree").combotree('setValues',pageProc.xzOrgID.split(","));
+		}
 		if(pageQJ){
 			$("#qj_DG").datagrid("loadData", JSON.parse(pageQJ));
 		}
+		$('#tabspick').tabs('keyDownTab');
 	});
 	
 	$("#orgCombotree").combotree({
-		lines:true ,
+		lines:true,
+		multiple:true,
 	    url:"${app}/sys/org/queryAllOrgTree.do"
 	});
 	

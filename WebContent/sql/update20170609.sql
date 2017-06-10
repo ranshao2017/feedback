@@ -1,0 +1,1 @@
+alter table biz_procinst alter column xzorgid varchar(320);

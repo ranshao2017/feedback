@@ -34,7 +34,7 @@ public class CarTestController extends BaseController {
 	 */
 	@RequestMapping("/forwardPickCarM")
 	public String forwardPickCarM(HttpServletRequest request, ModelMap map) throws Exception {
-		return "cartest/pickcarmanage";	
+		return "cartest/pickcarmanage";
 	}
 	
 	/**
@@ -65,6 +65,10 @@ public class CarTestController extends BaseController {
 	@RequestMapping("/submitTC")
 	@ResponseBody
 	public Map<String, Object> submitTC(HttpServletRequest request, @Valid ProcInst inst) throws Exception {
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			String xzOrg = inst.getXzOrgID().replaceAll("-", ",");
+			inst.setXzOrgID(xzOrg);
+		}
 		String qjData = request.getParameter("qjData");
 		carTestService.submitTC(inst, getLoginInfo(request), qjData);
 		return this.writeSuccMsg("已提交至调车");
@@ -249,6 +253,10 @@ public class CarTestController extends BaseController {
 	@ResponseBody
 	public Map<String, Object> saveUXx(HttpServletRequest request, @Valid ProcInst inst) throws Exception {
 		String qjData = request.getParameter("qjData");
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			String xzOrg = inst.getXzOrgID().replaceAll("-", ",");
+			inst.setXzOrgID(xzOrg);
+		}
 		carTestService.saveUXx(inst, getLoginInfo(request), qjData);
 		return this.writeSuccMsg("已保存缺件不可调车");
 	}

@@ -67,6 +67,9 @@
 	
 	$(document).ready(function() {
 		$("#formCT").form('setData', pageProc);
+		if(pageProc.xzOrgID){
+			$("#orgCombotree").combotree('setValues',pageProc.xzOrgID.split(","));
+		}
 		if(!pageQJ){
 			$('#tabspick').tabs('close', "缺件信息");
 		}else{
@@ -80,10 +83,12 @@
 		if(pageNode){
 			$("#formDJ").form('setData', pageNode);
 		}
+		$('#tabspick').tabs('keyDownTab');
 	});
 	
 	$("#orgCombotree").combotree({
-		lines:true ,
+		lines:true,
+		multiple:true,
 	    url:"${app}/sys/org/queryAllOrgTree.do"
 	});
 	
