@@ -4,7 +4,6 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
    	<%@ include file="/commons/head.jspf"%>
-   	<script type="text/javascript" src="${app}/static/js/jquery.cookie.js"></script>
   	<link rel="stylesheet" type="text/css" href="${app}/static/css/normalize.css">
   	<link rel="stylesheet" type="text/css" href="${app}/static/bootstrap/css/bootstrap.min.css">
   	<title>${app_name}</title>

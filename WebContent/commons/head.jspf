@@ -27,3 +27,5 @@
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-validatebox.js"></script>
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-datebox.js?v=4"></script>
 <script type="text/javascript" src="${app}/static/easyui/extends/easyui-extend-tab.js"></script>
+
+<script type="text/javascript" src="${app}/static/js/jquery.cookie.js"></script>

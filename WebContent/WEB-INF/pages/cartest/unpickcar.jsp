@@ -21,7 +21,7 @@
 				    		<input title="下线时间" name="xxsj" disabled/>
 				    		<input title="发动机" name="fdj" disabled/>
 				      		<textarea colspan="2" title="配置" name="pz" rows='5' style="width:400px;" disabled></textarea>
-				      		<textarea colspan="2" title="故障描述" name="descr" rows='4' style="width:400px;" required="true" class="easyui-validatebox"></textarea>
+				      		<textarea colspan="2" id="gzms" title="故障描述" name="descr" rows='4' style="width:400px;" class="easyui-validatebox"></textarea>
 				      		<input colspan="2" id="orgCombotree" title="协助部门" class="easyui-combotree" name="xzOrgID" style="width:406px;" panelHeight="auto"/>
 				      		<textarea colspan="2" title="备注" name="bz" rows='3' style="width:400px;"></textarea>
 				    	</form>
@@ -56,7 +56,20 @@
 			$("#qj_DG").datagrid("loadData", JSON.parse(pageQJ));
 		}
 		$('#tabspick').tabs('keyDownTab');
+		setInterval('saveCookie()', 30000);
+		if($.cookie('unpickcar')){
+			$("#gzms").val($.cookie('unpickcar'));
+		}
 	});
+	
+	function saveCookie(){
+		var gzms = $("#gzms").val();
+		if(gzms){
+			$.cookie('unpickcar', gzms, {
+		    	expires : 2
+			});
+		}
+	}
 	
 	$("#orgCombotree").combotree({
 		lines:true,

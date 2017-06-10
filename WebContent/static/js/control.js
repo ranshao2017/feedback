@@ -174,15 +174,16 @@ ctrl.openWin = (function() {
 			top : top,
 			left : winLeft
 		});
+		$(win).window({
+			onBeforeClose:function(){
+				
+			}
+		});
 		$(win).window("open");
 	}
 
-	return function(url, obj, w, h, t, level, closableMark ,igoreLoginOverTimeFlag) {
-		if(true==igoreLoginOverTimeFlag){
-			popFrame(url, obj, w, h, t, level, closableMark);
-		}else{
-			popFrame(url, obj, w, h, t, level, closableMark);
-		}
+	return function(url, obj, w, h, t, level, closableMark) {
+		popFrame(url, obj, w, h, t, level, closableMark);
 	};
 })();
 

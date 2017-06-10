@@ -140,8 +140,9 @@ public class CarTestDao extends BaseDAO {
 		}
 		String dph = paras.get("dph");
 		if(StringUtils.isNotBlank(dph)){
-			sql.append(" and proc.DPH = :dph");
+			sql.append(" and pro.DPH = :dph");
 		}
+		sql.append(" order by pro.STATUS");
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(dph)){
 			entity.setObject("dph", dph);

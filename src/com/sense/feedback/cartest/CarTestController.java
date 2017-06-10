@@ -56,7 +56,7 @@ public class CarTestController extends BaseController {
 		PaiChan pc = carTestService.queryPCDetail(scdh);
 		String pcJson = JSON.toJSONStringWithDateFormat(pc, "yyyy-MM-dd HH:mm:ss");
 		map.put("pcJson", pcJson);
-		return "cartest/pickcar";	
+		return "cartest/pickcar";
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class CarTestController extends BaseController {
 	 */
 	@RequestMapping("/forwardCarRepo")
 	public String forwardCarRepo(HttpServletRequest request, ModelMap map) throws Exception {
-		return "cartest/cartrepo";	
+		return "cartest/cartrepotm";	
 	}
 	
 	/**
@@ -267,6 +267,6 @@ public class CarTestController extends BaseController {
 	@RequestMapping("/forwardXzTC")
 	public String forwardXzTC(HttpServletRequest request, ModelMap map) throws Exception {
 		map.put("xzOrgID", getLoginInfo(request).getOrgId());
-		return "cartest/xzcart";	
+		return "cartest/xzcartm";	
 	}
 }
