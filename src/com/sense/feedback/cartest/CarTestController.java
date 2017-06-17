@@ -149,6 +149,16 @@ public class CarTestController extends BaseController {
 	}
 	
 	/**
+	 * 各模块记录统计
+	 */
+	@RequestMapping("/queryCTCount")
+	@ResponseBody
+	public Map<String, Object> queryCTCount(String status) throws Exception {
+		Map<String, Object> paras = carTestService.queryCTCount(status);
+		return this.writeSuccMsg("", paras);
+	}
+	
+	/**
 	 * 调试、故障排除、送检页面
 	 */
 	@RequestMapping("/forwardCT")

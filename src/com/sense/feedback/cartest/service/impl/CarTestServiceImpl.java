@@ -1,6 +1,7 @@
 package com.sense.feedback.cartest.service.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import com.sense.feedback.enumdic.EnumProcNode;
 import com.sense.feedback.enumdic.EnumProcesSta;
 import com.sense.feedback.enumdic.EnumYesNo;
 import com.sense.frame.base.BaseService;
+import com.sense.frame.base.BusinessException;
 import com.sense.frame.pub.global.LoginInfo;
 import com.sense.frame.pub.model.PageInfo;
 
@@ -143,25 +145,28 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 	 * 保存当前环节处理信息，跳转至下一环节
 	 */
 	@Override
-	public void submitCT(ProcInstNode inst, LoginInfo loginInfo) throws Exception {
-		ProcInst proc = commonDao.findEntityByID(ProcInst.class, inst.getScdh());
+	public void submitCT(ProcInstNode node, LoginInfo loginInfo) throws Exception {
+		ProcInst proc = commonDao.findEntityByID(ProcInst.class, node.getScdh());
 		Date nowDate = new Date();
-		if(StringUtils.isBlank(inst.getId())){
-			inst.setId(dBUtil.getCommonId());
+		if(StringUtils.isBlank(node.getId())){
+			node.setId(dBUtil.getCommonId());
 		}
-		inst.setProNode(proc.getStatus());
+		node.setProNode(proc.getStatus());
 		if(EnumProcNode.ts.getCode().equals(proc.getStatus())){//调试保存，将接车时间保存为该环节开始时间
-			inst.setCreateTime(proc.getJcsj());
+			node.setCreateTime(proc.getJcsj());
 		}else{
-			ProcInstNode preNode = carTestDao.queryPreInstNode(inst.getScdh(), proc.getStatus());
-			inst.setCreateTime(preNode.getSubmitTime());
+			ProcInstNode preNode = carTestDao.queryPreInstNode(node.getScdh(), proc.getStatus());
+			node.setCreateTime(preNode.getSubmitTime());
 		}
-		inst.setSubmitTime(nowDate);
-		inst.setTs(nowDate);
-		inst.setUsrID(loginInfo.getUserId());
-		inst.setUsrNam(loginInfo.getUserNam());
-		commonDao.saveOrUpdateEntity(inst);
+		node.setSubmitTime(nowDate);
+		node.setTs(nowDate);
+		node.setUsrID(loginInfo.getUserId());
+		node.setUsrNam(loginInfo.getUserNam());
+		commonDao.saveOrUpdateEntity(node);
 		
+		if(EnumProcNode.sy.getCode().equals(proc.getStatus())){//记录入库时间
+			proc.setRksj(nowDate);
+		}
 		proc.setStatus(String.valueOf(Integer.parseInt(proc.getStatus()) + 1));
 		proc.setProcesSta(EnumProcesSta.xtj.getCode());
 		commonDao.updateEntity(proc);
@@ -289,6 +294,9 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 			dbNode.setDescr(node.getDescr());
 			commonDao.saveOrUpdateEntity(dbNode);
 			
+			if(EnumProcNode.sy.getCode().equals(proc.getStatus())){//记录入库时间
+				proc.setRksj(nowDate);
+			}
 			proc.setStatus(String.valueOf(Integer.parseInt(proc.getStatus()) + 1));
 			proc.setProcesSta(EnumProcesSta.xtj.getCode());
 			commonDao.updateEntity(proc);
@@ -407,6 +415,21 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 			proc.setProcesSta(EnumProcesSta.fjbhg.getCode());
 			commonDao.updateEntity(proc);
 		}
+	}
+
+	@Override
+	public Map<String, Object> queryCTCount(String status) throws Exception {
+		if(StringUtils.isBlank(status)){
+			throw new BusinessException("参数不合法");
+		}
+		Integer ctCount = carTestDao.queryCtCount(status);
+		Integer lngCount = carTestDao.queryLngCount(status);
+		Integer cngCount = carTestDao.queryCngCount(status);
+		Map<String, Object> paras = new HashMap<String, Object>();
+		paras.put("ctCount", ctCount);
+		paras.put("lngCount", lngCount);
+		paras.put("cngCount", cngCount);
+		return paras;
 	}
 
 }

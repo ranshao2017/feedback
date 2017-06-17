@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.transform.Transformers;
+import org.hibernate.type.IntegerType;
 import org.springframework.stereotype.Component;
 
 import com.sense.feedback.entity.PaiChan;
@@ -69,6 +70,14 @@ public class CarTestDao extends BaseDAO {
 		String ddh = paras.get("ddh");
 		if(StringUtils.isNotBlank(ddh)){
 			sql.append(" and DDH = :ddh");
+		}
+		String trq = paras.get("trq");
+		if(StringUtils.isNotBlank(trq)){
+			if(EnumYesNo.yes.getCode().equals(trq)){
+				sql.append(" and (CX like '%L/%' or CX like '%C/%')");
+			}else{
+				sql.append(" and (CX not like '%L/%' and CX not like '%C/%')");
+			}
 		}
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(status)){
@@ -162,6 +171,27 @@ public class CarTestDao extends BaseDAO {
 			return list.get(0);
 		}
 		return null;
+	}
+
+	public Integer queryCtCount(String status) throws Exception{
+		String sql = "select count(1) num from BIZ_PROCINST where STATUS = :status";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("status", status);
+		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
+	}
+
+	public Integer queryLngCount(String status) throws Exception{
+		String sql = "select count(1) num from BIZ_PROCINST where STATUS = :status and CX like '%L/%'";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("status", status);
+		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
+	}
+
+	public Integer queryCngCount(String status) throws Exception{
+		String sql = "select count(1) num from BIZ_PROCINST where STATUS = :status and CX like '%C/%'";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("status", status);
+		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
 	}
 
 }

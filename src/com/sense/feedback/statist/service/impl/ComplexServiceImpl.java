@@ -39,4 +39,9 @@ public class ComplexServiceImpl extends BaseService implements ComplexService {
 		return complexDao.queryCarTOverPage(pageInfo);
 	}
 
+	@Override
+	public PageInfo queryStaistPage(PageInfo pageInfo, Map<String, String> paras) throws Exception {
+		return complexDao.queryStaistPage(pageInfo, paras);
+	}
+
 }

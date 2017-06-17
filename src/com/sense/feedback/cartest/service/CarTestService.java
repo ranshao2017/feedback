@@ -50,4 +50,6 @@ public interface CarTestService {
 
 	public void unQuailyCTs(ProcInstNode inst, LoginInfo loginInfo, String scdhs) throws Exception;
 
+	public Map<String, Object> queryCTCount(String status) throws Exception;
+
 }

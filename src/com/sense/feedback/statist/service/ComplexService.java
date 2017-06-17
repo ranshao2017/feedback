@@ -12,4 +12,6 @@ public interface ComplexService {
 
 	PageInfo queryCarTOverPage(PageInfo pageInfo) throws Exception;
 
+	PageInfo queryStaistPage(PageInfo pageInfo, Map<String, String> paras) throws Exception;
+
 }

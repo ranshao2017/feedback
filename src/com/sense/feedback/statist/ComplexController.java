@@ -22,7 +22,7 @@ public class ComplexController extends BaseController {
 	private ComplexService complexService;
 	
 	/**
-	 * 不可调车页面
+	 * 在调车查询页面
 	 */
 	@RequestMapping("/forwardTCPage")
 	public String forwardTCPage(HttpServletRequest request, ModelMap map) throws Exception {
@@ -66,4 +66,21 @@ public class ComplexController extends BaseController {
 		return complexService.queryCarTOverPage(getPageInfo(request));
 	}
 	
+	/**
+	 * 综合统计页面
+	 */
+	@RequestMapping("/forwardStaistPage")
+	public String forwardStaistPage(HttpServletRequest request, ModelMap map) throws Exception {
+		return "statist/cartstaistquery";
+	}
+	
+	/**
+	 * 综合统计查询
+	 */
+	@RequestMapping("/queryStaistPage")
+	@ResponseBody     
+	public PageInfo queryStaistPage(HttpServletRequest request) throws Exception{	
+		Map<String, String> paras = getRequestPara(request);
+		return complexService.queryStaistPage(getPageInfo(request), paras);
+	}
 }

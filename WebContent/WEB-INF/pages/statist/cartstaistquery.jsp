@@ -9,21 +9,31 @@
 </head>
 <body class="easyui-layout">
 	<div region="north" border="false">
-		<form id="queryForm" columns='4' class="easyui-form">
-			<input title="底盘号" name="dph"/>
+		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="订单号" name="ddh"/>
-			<input title="天然气车" name="trq" syscode="YESNO" class="easyui-combobox"  panelHeight="auto" editable="false"/>
-			<input type="hidden" name="status" value="${status }"/>
+			<input title="底盘号" name="dph"/>
+			<input title="缺件" name="qj" syscode="YESNO" class="easyui-combobox" rootflag="root" panelHeight="auto" editable="false"/>
+			<input title="下线时间开始" name="jcsjStart"/>
+			<input title="下线时间结束" name="jcsjEnd"/>
+			<select class="easyui-combobox" name="status" title="调试状态" panelHeight="auto" editable="false">
+				<option value="">全部</option>
+			    <option value="1">调试</option>
+			    <option value="2">故障排除</option>
+			    <option value="3">送验</option>
+			    <option value="4">入库</option>
+			</select>
+			<input title="入库时间开始" name="rkStart"/>
+			<input title="入库时间结束" name="rkEnd"/>
+			<input title="天然气车" name="trq" syscode="YESNO" rootflag="root" class="easyui-combobox" panelHeight="auto" editable="false"/>
+			<input title="超期" name="cq" syscode="YESNO" rootflag="root" class="easyui-combobox" panelHeight="auto" editable="false"/>
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
 	</div>
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('调试','故障排除')">调试</a>
-           		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('故障排除','送验')">故障排除</a>
-           		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('送验','入库')">送验</a>
-           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
+           		<a class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;">&nbsp;</span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -37,7 +47,7 @@
 </body> 
 <script type="text/javascript">
 	$(document).ready(function() {
-		ctrl.loadPageBtnAuthority(parent.globalJO.permTable[parent.globalJO.curMenuID], initPage());
+		initPage();
 	});
 	
 	function initPage(){
@@ -48,13 +58,12 @@
 			toolbar:"#tb",
 			border:false,
 			fitColumns:true,
-			singleSelect:false,
+			singleSelect:true,
 			pagination : true,
 			rownumbers : true,
 			striped:true,
 			pageSize : 30,
 			pageList : [ 30,50,100 ],
-			frozenColumns:[[{field:'ck',checkbox:true}]],
 			columns : [ [  {
 				field : "dph",
 				width : 60,
@@ -71,6 +80,10 @@
 				field : "ddh",
 				width : 60,
 				title : "订单号"
+			},{
+				field : "status",
+				title : "调试状态",
+				formatter:ctrl.dicConvert('PROCNODE')
 			},{
 				field : "xxsj",
 				width : 80,
@@ -93,9 +106,6 @@
 				width : 100,
 				title : "备注"
 			},{
-				field : "status",
-				hidden : true
-			},{
 				field : "procesSta",
 				title : "处理状态",
 				formatter:ctrl.dicConvert('PROCESSTA')
@@ -107,23 +117,11 @@
 				}
 			},
 			onDblClickRow:function(rowIndex, rowData){
-				if('1' == rowData.status){
-					ctcar(rowData,'调试','故障排除');
-				}else if('2' == rowData.status){
-					ctcar(rowData,'故障排除','送验');
-				}else if('3' == rowData.status){
-					ctcar(rowData,'送验','入库');
-				}
+				repoInfo();
 			},
-			rowStyler : function (index, row){
-	    		if(row.procesSta == '1'){
-	    			return "color:blue;";
-	    		}else if(row.procesSta == '2'){
-	    			return "color:#FF0000";
-	    		}else if(row.procesSta == '3'){
-	    			return "color:#D52B2B";
-	    		}
-	    	}
+			onLoadSuccess:function(data){
+				$("#total_span").text('检索出记录总数：' + data.total);
+			}
 		});
 		
 		setTimeout('queryCT()', 200);
@@ -131,42 +129,19 @@
 	
 	function queryCT(){
 	    var param = $("#queryForm").form("getData");
-	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryCTPage.do";
+	    $("#pc_DG").datagrid("options").url="${app}/complex/queryStaistPage.do";
 	    $('#pc_DG').datagrid("load", param);
 	    $('#pc_DG').datagrid("clearSelections");
-	    
-	    ctrl.operPost("${app}/cartest/queryCTCount.do", $("#queryForm").form("getData"), function(paraMap){
-	    	 $("#total_span").text('总计 ' + paraMap.ctCount + 
-	    			 " 条 （LNG " + paraMap.lngCount + " 条，CNG " + paraMap.cngCount + " 条，非天然气 " + 
-	    			 (paraMap.ctCount - paraMap.lngCount - paraMap.cngCount) + " 条）");
-	    });
 	}
 	
-	function ctcar(rowData, title, nextbtn){
-		var url = '${app}/cartest/forwardCT.do';
-		ctrl.openWin(url, {'scdh':rowData.scdh,'nextbtn':nextbtn}, 650, 450, title);
-	}
-	
-	function ctcars(title, nextbtn){
-		var proRow = $("#pc_DG").datagrid("getChecked");
+	function repoInfo(){
+		var proRow = $("#pc_DG").datagrid("getSelected");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
-		if(proRow.length > 1){
-			var scdhs = "";
-			for(var i = 0; i < proRow.length; i ++){
-				if(scdhs.length > 0){
-					scdhs += ",";
-				}
-				scdhs += proRow[i].scdh;
-			}
-			var url = '${app}/cartest/forwardCTs.do';
-			ctrl.openWin(url, {'scdhs':scdhs,'nextbtn':nextbtn}, 550, 250, "批量" + title);
-		}else{
-			var url = '${app}/cartest/forwardCT.do';
-			ctrl.openWin(url, {'scdh':proRow[0].scdh,'nextbtn':nextbtn}, 650, 450, title);
-		}
+		var url = '${app}/cartest/forwardRepoInfo.do';
+		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 450, "详情");
 	}
 </script>
 </html>

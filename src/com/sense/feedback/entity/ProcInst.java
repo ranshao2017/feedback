@@ -44,6 +44,8 @@ public class ProcInst implements Serializable {
 	private String status;//环节标识 0下线 1调试 2故障排除 3送验 4入库
 	@Column(name = "JCSJ")
 	private Date jcsj;//接车时间
+	@Column(name = "RKSJ")
+	private Date rksj;//入库时间
 	@Column(name = "JCUSRID")
 	private String jcUsrID;//接车用户ID
 	@Column(name = "JCUSRNAM")
@@ -145,6 +147,12 @@ public class ProcInst implements Serializable {
 	}
 	public void setJcUsrNam(String jcUsrNam) {
 		this.jcUsrNam = jcUsrNam;
+	}
+	public Date getRksj() {
+		return rksj;
+	}
+	public void setRksj(Date rksj) {
+		this.rksj = rksj;
 	}
 	public String getRepoinfo() {
 		return repoinfo;
