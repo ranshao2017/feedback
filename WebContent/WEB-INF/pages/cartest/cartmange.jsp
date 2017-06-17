@@ -19,9 +19,10 @@
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('调试','故障排除')">调试</a>
-           		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('故障排除','送验')">故障排除</a>
-           		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcar('送验','入库')">送验</a>
+           		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('调试','故障排除')">调试</a>
+           		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('故障排除','送验')">故障排除</a>
+           		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('送验','入库')">送验</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -46,12 +47,13 @@
 			toolbar:"#tb",
 			border:false,
 			fitColumns:true,
-			singleSelect:true,
+			singleSelect:false,
 			pagination : true,
 			rownumbers : true,
 			striped:true,
 			pageSize : 30,
 			pageList : [ 30,50,100 ],
+			frozenColumns:[[{field:'ck',checkbox:true}]],
 			columns : [ [  {
 				field : "dph",
 				width : 60,
@@ -84,7 +86,7 @@
 				field : "qjFlag",
 				width : 50,
 				title : "是否缺件",
-				formatter:ctrl.dicConvert('YESNO') 
+				formatter:ctrl.dicConvert('YESNO')
 			},{
 				field : "bz",
 				width : 100,
@@ -92,6 +94,10 @@
 			},{
 				field : "status",
 				hidden : true
+			},{
+				field : "procesSta",
+				title : "处理状态",
+				formatter:ctrl.dicConvert('PROCESSTA')
 			} ] ],
 			onClickCell:function(rowIndex, field, value){
 				if('pz' == field){
@@ -101,13 +107,25 @@
 			},
 			onDblClickRow:function(rowIndex, rowData){
 				if('1' == rowData.status){
-					ctcar('调试','故障排除');
+					ctcar(rowData,'调试','故障排除');
 				}else if('2' == rowData.status){
-					ctcar('故障排除','送验');
+					ctcar(rowData,'故障排除','送验');
 				}else if('3' == rowData.status){
-					ctcar('送验','入库');
+					ctcar(rowData,'送验','入库');
 				}
-			}
+			},
+			onLoadSuccess:function(data){
+				$("#total_span").text('检索出记录总数：' + data.total);
+			},
+			rowStyler : function (index, row){
+	    		if(row.procesSta == '1'){
+	    			return "color:blue;";
+	    		}else if(row.procesSta == '2'){
+	    			return "color:#FF0000";
+	    		}else if(row.procesSta == '3'){
+	    			return "color:#D52B2B";
+	    		}
+	    	}
 		});
 		
 		setTimeout('queryCT()', 200);
@@ -120,15 +138,31 @@
 	    $('#pc_DG').datagrid("clearSelections");
 	}
 	
-	function ctcar(title,nextbtn){
-		var proRow = $("#pc_DG").datagrid("getSelected");
+	function ctcar(rowData, title, nextbtn){
+		var url = '${app}/cartest/forwardCT.do';
+		ctrl.openWin(url, {'scdh':rowData.scdh,'nextbtn':nextbtn}, 650, 450, title);
+	}
+	
+	function ctcars(title, nextbtn){
+		var proRow = $("#pc_DG").datagrid("getChecked");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
-		var url = '${app}/cartest/forwardCT.do';
-		ctrl.openWin(url, {'scdh':proRow.scdh,'nextbtn':nextbtn}, 650, 450, title);
+		if(proRow.length > 1){
+			var scdhs = "";
+			for(var i = 0; i < proRow.length; i ++){
+				if(scdhs.length > 0){
+					scdhs += ",";
+				}
+				scdhs += proRow[i].scdh;
+			}
+			var url = '${app}/cartest/forwardCTs.do';
+			ctrl.openWin(url, {'scdhs':scdhs,'nextbtn':nextbtn}, 550, 250, "批量" + title);
+		}else{
+			var url = '${app}/cartest/forwardCT.do';
+			ctrl.openWin(url, {'scdh':proRow[0].scdh,'nextbtn':nextbtn}, 650, 450, title);
+		}
 	}
-	
 </script>
 </html>

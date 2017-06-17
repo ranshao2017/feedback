@@ -16,6 +16,7 @@ public class ProcInstNodeDto implements Serializable {
 	private String usrid;//用户ID
 	private String usrnam;//用户名称
 	private String ts;//处理时间
+	private String createtime;//开始处理时间
 	private String submittime;//提交至下一环节时间时间
 	
 	public String getId() {
@@ -71,5 +72,11 @@ public class ProcInstNodeDto implements Serializable {
 	}
 	public void setUsrnam(String usrnam) {
 		this.usrnam = usrnam;
+	}
+	public String getCreatetime() {
+		return createtime;
+	}
+	public void setCreatetime(String createtime) {
+		this.createtime = createtime;
 	}
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import com.sense.app.dto.ProcInstNodeDto;
 import com.sense.app.service.AppCTService;
 import com.sense.app.util.AppJsonUtil;
 import com.sense.frame.base.BaseController;
+import com.sense.frame.pub.model.PageInfo;
 import com.sense.sys.dic.DicLoader;
 
 @Controller
@@ -75,14 +77,16 @@ public class AppCTController extends BaseController {
 	@RequestMapping("/saveCT")
 	@ResponseBody
 	public Map<String, Object> saveCT(String scdh, String carseat, String descr, String userid) {
-		Map<String, Object> paraMap = new HashMap<String, Object>();
+		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
+			return AppJsonUtil.writeErr("参数不合法");
+		}
 		try {
 			appCTService.saveCT(scdh, carseat, descr, userid);
 		} catch (Exception e) {
 			log.error("整车调试保存接口异常", e);
 			return AppJsonUtil.writeErr("整车调试保存接口异常");
 		}
-		return AppJsonUtil.writeSucc("操作成功！", paraMap);
+		return AppJsonUtil.writeSucc("操作成功！");
 	}
 	
 	/**
@@ -91,14 +95,34 @@ public class AppCTController extends BaseController {
 	@RequestMapping("/submitCT")
 	@ResponseBody
 	public Map<String, Object> submitCT(String scdh, String carseat, String descr, String userid) {
-		Map<String, Object> paraMap = new HashMap<String, Object>();
+		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
+			return AppJsonUtil.writeErr("参数不合法");
+		}
 		try {
 			appCTService.submitCT(scdh, carseat, descr, userid);
 		} catch (Exception e) {
 			log.error("整车调试提交接口异常", e);
 			return AppJsonUtil.writeErr("整车调试提交接口异常");
 		}
-		return AppJsonUtil.writeSucc("操作成功！", paraMap);
+		return AppJsonUtil.writeSucc("操作成功！");
+	}
+	
+	/**
+	 * 整车调试复检不合格和退回故障排除接口
+	 */
+	@RequestMapping("/unQualiyCT")
+	@ResponseBody
+	public Map<String, Object> unQualiyCT(String scdh, String carseat, String descr, String userid, String processta) {
+		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid) || StringUtils.isBlank(processta)){
+			return AppJsonUtil.writeErr("参数不合法");
+		}
+		try {
+			appCTService.unQualiyCT(scdh, carseat, descr, userid, processta);
+		} catch (Exception e) {
+			log.error("整车调试提交接口异常", e);
+			return AppJsonUtil.writeErr("整车调试提交接口异常");
+		}
+		return AppJsonUtil.writeSucc("操作成功！");
 	}
 	
 	/**
@@ -116,6 +140,28 @@ public class AppCTController extends BaseController {
 			return AppJsonUtil.writeErr("缺件信息接口异常");
 		}
 		return AppJsonUtil.writeSucc("操作成功！", paraMap);
+	}
+	
+	/**
+	 * 查看在调车辆列表
+	 * @param pagerow 每页显示多少行
+	 * @param pagesize 当前第几页
+	 */
+	@RequestMapping("/queryCTPage")
+	@ResponseBody
+	public Map<String, Object> queryCTPage(int pagerow, int pagesize, String dph, String ddh) {
+		try{
+			PageInfo pi = new PageInfo();
+			pi.setPageSize(pagerow);
+			pi.setPageNumber(pagesize);
+			List<ProcInstDto> list = appCTService.queryCTPage(pi, dph, ddh);
+			Map<String, Object> paraMap = new HashMap<String, Object>();
+			paraMap.put("returnlist", list);
+			return AppJsonUtil.writeSucc("操作成功", paraMap);
+		}catch(Exception e){
+			log.error("查看在调车辆列表", e);
+			return AppJsonUtil.writeErr("查看在调车辆列表异常");
+		}
 	}
 	
 }

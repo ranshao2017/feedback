@@ -20,6 +20,7 @@
 	    <div id="tb">
            	<div class="perm-panel" >
            		<a id="0ZCTS010601" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="pctcar()">调车处理</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -99,6 +100,9 @@
 			},
 			onDblClickRow:function(rowIndex, rowData){
 				pctcar();
+			},
+			onLoadSuccess:function(data){
+				$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		

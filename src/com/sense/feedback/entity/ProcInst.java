@@ -48,9 +48,13 @@ public class ProcInst implements Serializable {
 	private String jcUsrID;//接车用户ID
 	@Column(name = "JCUSRNAM")
 	private String jcUsrNam;//接车用户名称
+	@Column(name = "PROCESSTA")
+	private String procesSta;//处理状态 新提交、处理保存、退回
 	
 	@Transient
 	private String repoinfo;//质检系统入库状态
+	@Transient
+	private Integer jgDay;//超期间隔天数
 	
 	public String getScdh() {
 		return scdh;
@@ -147,5 +151,17 @@ public class ProcInst implements Serializable {
 	}
 	public void setRepoinfo(String repoinfo) {
 		this.repoinfo = repoinfo;
+	}
+	public String getProcesSta() {
+		return procesSta;
+	}
+	public void setProcesSta(String procesSta) {
+		this.procesSta = procesSta;
+	}
+	public Integer getJgDay() {
+		return jgDay;
+	}
+	public void setJgDay(Integer jgDay) {
+		this.jgDay = jgDay;
 	}
 }

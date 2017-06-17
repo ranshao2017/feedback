@@ -12,16 +12,14 @@
 		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
 			<input title="订单号" name="ddh"/>
-			<input type="hidden" name="xzOrgID" value="${xzOrgID }">
-			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryRepo()">检索</a>
+			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
 	</div>
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010501" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
-           		<a id="0ZCTS010701" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
-           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
+           		<a class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;">&nbsp;</span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -35,7 +33,7 @@
 </body> 
 <script type="text/javascript">
 	$(document).ready(function() {
-		ctrl.loadPageBtnAuthority(parent.globalJO.permTable[parent.globalJO.curMenuID], initPage());
+		initPage();
 	});
 	
 	function initPage(){
@@ -70,10 +68,9 @@
 				title : "订单号"
 			},{
 				field : "status",
-				width : 50,
-				title : "状态",
+				title : "调试状态",
 				formatter:ctrl.dicConvert('PROCNODE')
-			}, {
+			},{
 				field : "xxsj",
 				width : 80,
 				title : "下线时间"
@@ -89,11 +86,15 @@
 				field : "qjFlag",
 				width : 50,
 				title : "是否缺件",
-				formatter:ctrl.dicConvert('YESNO') 
+				formatter:ctrl.dicConvert('YESNO')
 			},{
 				field : "bz",
 				width : 100,
 				title : "备注"
+			},{
+				field : "procesSta",
+				title : "处理状态",
+				formatter:ctrl.dicConvert('PROCESSTA')
 			} ] ],
 			onClickCell:function(rowIndex, field, value){
 				if('pz' == field){
@@ -103,20 +104,21 @@
 			},
 			onDblClickRow:function(rowIndex, rowData){
 				repoInfo();
-			},
-			onLoadSuccess:function(data){
-				$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		
-		setTimeout('queryRepo()', 200);
+		setTimeout('queryCT()', 200);
 	}
 	
-	function queryRepo(){
+	function queryCT(){
 	    var param = $("#queryForm").form("getData");
-	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryCTPage.do";
+	    $("#pc_DG").datagrid("options").url="${app}/complex/queryCarTPage.do";
 	    $('#pc_DG').datagrid("load", param);
 	    $('#pc_DG').datagrid("clearSelections");
+	    
+	    ctrl.operPost("${app}/complex/queryStaCount.do", $("#queryForm").form("getData"), function(paraMap){
+	    	 $("#total_span").text('调试车辆总数：' + paraMap.tsCount + "，故障排除车辆总数：" + paraMap.gzCount + "，送验车辆总数：" + paraMap.syCount);
+	    });
 	}
 	
 	function repoInfo(){

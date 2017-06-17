@@ -16,11 +16,15 @@ import com.sense.app.dao.AppCTDao;
 import com.sense.app.dto.ProcInstDto;
 import com.sense.app.dto.ProcInstNodeDto;
 import com.sense.app.service.AppCTService;
+import com.sense.feedback.cartest.dao.CarTestDao;
 import com.sense.feedback.entity.ProcInst;
 import com.sense.feedback.entity.ProcInstNode;
 import com.sense.feedback.entity.QueJian;
 import com.sense.feedback.enumdic.EnumProcNode;
+import com.sense.feedback.enumdic.EnumProcesSta;
+import com.sense.feedback.statist.dao.ComplexDao;
 import com.sense.frame.base.BaseService;
+import com.sense.frame.pub.model.PageInfo;
 import com.sense.sys.dic.DicLoader;
 import com.sense.sys.entity.Org;
 import com.sense.sys.entity.Usr;
@@ -33,17 +37,24 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 	@Autowired
 	private AppCTDao appCtDao;
 	@Autowired
+	private CarTestDao carTestDao;
+	@Autowired
 	private DicLoader dicLoader;
+	@Autowired
+	private ComplexDao complexDao;
 
 	@Override
 	public ProcInstDto queryProcInst(String dph, String userid) throws Exception {
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
 		Org org = commonDao.findEntityByID(Org.class, usr.getOrgID());
-		List<ProcInst> list = commonDao.findEntityList(ProcInst.class, "dph", dph);
-		if(CollectionUtils.isEmpty(list)){
+		
+		if(StringUtils.isBlank(dph)){
 			return null;
 		}
-		ProcInst procInst = list.get(0);
+		ProcInst procInst = appCtDao.queryProcInst(dph);
+		if(null == procInst){
+			return null;
+		}
 		if(!procInst.getStatus().equals(org.getProcs())){
 			return null;
 		}
@@ -91,6 +102,9 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			if(null != node.getTs()){
 				dto.setTs(sdf.format(node.getTs()));
 			}
+			if(null != node.getCreateTime()){
+				dto.setCreatetime(sdf.format(node.getCreateTime()));
+			}
 			dto.setUsrid(node.getUsrID());
 			dto.setUsrnam(node.getUsrNam());
 			dtoList.add(dto);
@@ -101,45 +115,83 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 	@Override
 	public void saveCT(String scdh, String carseat, String descr, String userid) throws Exception {
 		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
-		
-		ProcInstNode inst = appCtDao.queryNode(scdh, proc.getStatus());
-		if(null == inst){
-			inst = new ProcInstNode();
-			inst.setId(dBUtil.getCommonId());
+		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
+		if(null == node){
+			node = new ProcInstNode();
+			node.setId(dBUtil.getCommonId());
+			node.setScdh(scdh);
+			node.setProNode(proc.getStatus());
+			ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
+			node.setCreateTime(preNode.getSubmitTime());
 		}
-		inst.setScdh(scdh);
-		inst.setCarSet(carseat);
-		inst.setDescr(descr);
-		inst.setProNode(proc.getStatus());
-		inst.setTs(new Date());
-		inst.setUsrID(userid);
+		node.setCarSet(carseat);
+		node.setDescr(descr);
+		node.setTs(new Date());
+		node.setUsrID(userid);
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
-		inst.setUsrNam(usr.getUsrNam());
-		commonDao.saveOrUpdateEntity(inst);
+		node.setUsrNam(usr.getUsrNam());
+		commonDao.saveOrUpdateEntity(node);
+		
+		proc.setProcesSta(EnumProcesSta.clbc.getCode());
+		commonDao.updateEntity(proc);
 	}
 
 	@Override
 	public void submitCT(String scdh, String carseat, String descr, String userid) throws Exception {
 		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
-		
-		ProcInstNode inst = appCtDao.queryNode(scdh, proc.getStatus());
-		if(null == inst){
-			inst = new ProcInstNode();
-			inst.setId(dBUtil.getCommonId());
+		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
+		if(null == node){
+			node = new ProcInstNode();
+			node.setId(dBUtil.getCommonId());
+			node.setScdh(scdh);
+			node.setProNode(proc.getStatus());
+			ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
+			node.setCreateTime(preNode.getSubmitTime());
 		}
-		inst.setScdh(scdh);
-		inst.setCarSet(carseat);
-		inst.setDescr(descr);
+		node.setCarSet(carseat);
+		node.setDescr(descr);
 		Date nowDate = new Date();
-		inst.setProNode(proc.getStatus());
-		inst.setSubmitTime(nowDate);
-		inst.setTs(nowDate);
-		inst.setUsrID(userid);
+		node.setSubmitTime(nowDate);
+		node.setTs(nowDate);
+		node.setUsrID(userid);
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
-		inst.setUsrNam(usr.getUsrNam());
-		commonDao.saveOrUpdateEntity(inst);
+		node.setUsrNam(usr.getUsrNam());
+		commonDao.saveOrUpdateEntity(node);
 		
 		proc.setStatus(String.valueOf(Integer.parseInt(proc.getStatus()) + 1));
+		proc.setProcesSta(EnumProcesSta.xtj.getCode());
+		commonDao.updateEntity(proc);
+	}
+
+	@Override
+	public void unQualiyCT(String scdh, String carseat, String descr,
+			String userid, String processta) throws Exception {
+		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
+		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
+		if(null == node){
+			node = new ProcInstNode();
+			node.setId(dBUtil.getCommonId());
+			node.setScdh(scdh);
+			node.setProNode(proc.getStatus());
+			ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
+			node.setCreateTime(preNode.getSubmitTime());
+		}
+		node.setCarSet(carseat);
+		node.setDescr(descr);
+		Date nowDate = new Date();
+		if(EnumProcesSta.fjbhg.getCode().equals(processta)){
+			proc.setProcesSta(processta);
+		}else if(EnumProcesSta.th.getCode().equals(processta)){
+			node.setSubmitTime(nowDate);
+			proc.setStatus(String.valueOf(Integer.parseInt(proc.getStatus()) - 1));
+			proc.setProcesSta(processta);
+		}
+		node.setTs(nowDate);
+		node.setUsrID(userid);
+		Usr usr = commonDao.findEntityByID(Usr.class, userid);
+		node.setUsrNam(usr.getUsrNam());
+		commonDao.saveOrUpdateEntity(node);
+		
 		commonDao.updateEntity(proc);
 	}
 
@@ -157,4 +209,33 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		return returnList;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<ProcInstDto> queryCTPage(PageInfo pi, String dph, String ddh) throws Exception {
+		Map<String, String> paras = new HashMap<String, String>();
+		paras.put("dph", dph);
+		paras.put("ddh", ddh);
+		pi = complexDao.queryCarTPage(pi, paras);
+		List<ProcInst> instList = (List<ProcInst>) pi.getRows();
+		List<ProcInstDto> returnList = new ArrayList<ProcInstDto>();
+		for(ProcInst procInst : instList){
+			ProcInstDto dto = new  ProcInstDto();
+			dto.setBz(procInst.getBz());
+			dto.setCx(procInst.getCx());
+			dto.setDdh(procInst.getDdh());
+			dto.setDescr(procInst.getDescr());
+			dto.setDph(procInst.getDph());
+			dto.setFdj(procInst.getFdj());
+			dto.setJcsj(sdf.format(procInst.getJcsj()));
+			dto.setJcusrid(procInst.getJcUsrID());
+			dto.setJcusrnam(procInst.getJcUsrNam());
+			dto.setPz(procInst.getPz());
+			dto.setQjflag(procInst.getQjFlag());
+			dto.setScdh(procInst.getScdh());
+			dto.setStatus(procInst.getStatus());
+			dto.setXxsj(sdf.format(procInst.getXxsj()));
+			returnList.add(dto);
+		}
+		return returnList;
+	}
 }

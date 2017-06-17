@@ -90,24 +90,25 @@ public class CarTestDao extends BaseDAO {
 	}
 
 	@SuppressWarnings("unchecked")
-	public ProcInstNode queryProcInstNode(String scdh, String status) throws Exception{
-		String hql = "from ProcInstNode where scdh = :scdh and proNode = :status";
+	public ProcInstNode queryCurrenttNode(String scdh, String status) throws Exception{
+		String hql = "from ProcInstNode where scdh = :scdh order by createTime desc";
 		Query query = getCurrentSession().createQuery(hql);
 		query.setString("scdh", scdh);
-		query.setString("status", status);
 		List<ProcInstNode> list = query.list();
 		if(CollectionUtils.isNotEmpty(list)){
-			return list.get(0);
+			ProcInstNode node = list.get(0);
+			if(node.getProNode().equals(status)){
+				return node;
+			}
 		}
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<ProcInstNode> queryPreInstNodeList(String scdh, String status) throws Exception{
-		String hql = "from ProcInstNode where scdh = :scdh and proNode < :status";
+	public List<ProcInstNode> queryPreInstNodeList(String scdh) throws Exception{
+		String hql = "from ProcInstNode where scdh = :scdh order by createTime";
 		Query query = getCurrentSession().createQuery(hql);
 		query.setString("scdh", scdh);
-		query.setString("status", status);
 		return query.list();
 	}
 
@@ -148,6 +149,19 @@ public class CarTestDao extends BaseDAO {
 			entity.setObject("dph", dph);
 		}
 		return executePageQuery(pageInfo, entity, ProcInst.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public ProcInstNode queryPreInstNode(String scdh, String status) throws Exception{
+		String hql = "from ProcInstNode where scdh = :scdh and proNode <> :status order by createTime desc";
+		Query query = getCurrentSession().createQuery(hql);
+		query.setString("scdh", scdh);
+		query.setString("status", status);
+		List<ProcInstNode> list = query.list();
+		if(CollectionUtils.isNotEmpty(list)){
+			return list.get(0);
+		}
+		return null;
 	}
 
 }

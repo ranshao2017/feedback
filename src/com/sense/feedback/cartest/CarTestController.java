@@ -20,6 +20,7 @@ import com.sense.feedback.entity.ProcInstNode;
 import com.sense.feedback.enumdic.EnumProcNode;
 import com.sense.feedback.enumdic.EnumYesNo;
 import com.sense.frame.base.BaseController;
+import com.sense.frame.base.BusinessException;
 import com.sense.frame.pub.model.PageInfo;
 
 @Controller
@@ -60,6 +61,16 @@ public class CarTestController extends BaseController {
 	}
 	
 	/**
+	 * 批量接车页面
+	 */
+	@RequestMapping("/forwardPickCars")
+	public String forwardPickCars(HttpServletRequest request, ModelMap map) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		map.put("scdhs", scdhs);
+		return "cartest/pickcars";
+	}
+	
+	/**
 	 * 下线提交至调车
 	 */
 	@RequestMapping("/submitTC")
@@ -71,6 +82,21 @@ public class CarTestController extends BaseController {
 		}
 		String qjData = request.getParameter("qjData");
 		carTestService.submitTC(inst, getLoginInfo(request), qjData);
+		return this.writeSuccMsg("已提交至调车");
+	}
+	
+	/**
+	 * 下线批量提交至调车
+	 */
+	@RequestMapping("/submitTCs")
+	@ResponseBody
+	public Map<String, Object> submitTCs(HttpServletRequest request, @Valid ProcInst inst) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			String xzOrg = inst.getXzOrgID().replaceAll("-", ",");
+			inst.setXzOrgID(xzOrg);
+		}
+		carTestService.submitTCs(inst, getLoginInfo(request), scdhs);
 		return this.writeSuccMsg("已提交至调车");
 	}
 	
@@ -129,6 +155,10 @@ public class CarTestController extends BaseController {
 	public String forwardCT(HttpServletRequest request, ModelMap map) throws Exception {
 		String scdh = request.getParameter("scdh");
 		ProcInst inst = carTestService.queryProcInst(scdh);
+		if(EnumProcNode.sy.getCode().equals(inst.getStatus())){
+			map.put("backBtn", "退回故障排除");
+			map.put("unQuailyBtn", "复检不合格");
+		}
 		String instJson = JSON.toJSONStringWithDateFormat(inst, "yyyy-MM-dd HH:mm:ss");
 		map.put("instJson", instJson);
 		if(EnumYesNo.yes.getCode().equals(inst.getQjFlag())){
@@ -145,6 +175,22 @@ public class CarTestController extends BaseController {
 			map.put("preNodeListJson", preNodeListJson);
 		}
 		return "cartest/ctcar";	
+	}
+	
+	/**
+	 * 批量调试、故障排除、送检页面
+	 */
+	@RequestMapping("/forwardCTs")
+	public String forwardCTs(HttpServletRequest request, ModelMap map) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		String[] scdhArr = scdhs.split(",");
+		ProcInst inst = carTestService.queryProcInst(scdhArr[0]);
+		if(EnumProcNode.sy.getCode().equals(inst.getStatus())){
+			map.put("backBtn", "退回故障排除");
+			map.put("unQuailyBtn", "复检不合格");
+		}
+		map.put("scdhs", scdhs);
+		return "cartest/ctcars";	
 	}
 	
 	/**
@@ -165,6 +211,68 @@ public class CarTestController extends BaseController {
 	public Map<String, Object> submitCT(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
 		carTestService.submitCT(inst, getLoginInfo(request));
 		return this.writeSuccMsg("已提交");
+	}
+	
+	/**
+	 * 退回至前一环节
+	 */
+	@RequestMapping("/backCT")
+	@ResponseBody
+	public Map<String, Object> backCT(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
+		carTestService.backCT(inst, getLoginInfo(request));
+		return this.writeSuccMsg("已退回");
+	}
+	
+	/**
+	 * 复检不合格
+	 */
+	@RequestMapping("/unQuailyCT")
+	@ResponseBody
+	public Map<String, Object> unQuailyCT(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
+		carTestService.unQuailyCT(inst, getLoginInfo(request));
+		return this.writeSuccMsg("保存不合格信息");
+	}
+	
+	/**
+	 * 批量提交处理，至下一环节
+	 */
+	@RequestMapping("/submitCTs")
+	@ResponseBody
+	public Map<String, Object> submitCTs(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		if(StringUtils.isBlank(scdhs)){
+			throw new BusinessException("参数不合法");
+		}
+		carTestService.submitCTs(inst, getLoginInfo(request), scdhs);
+		return this.writeSuccMsg("已提交");
+	}
+	
+	/**
+	 * 批量退回处理，至前一环节
+	 */
+	@RequestMapping("/backCTs")
+	@ResponseBody
+	public Map<String, Object> backCTs(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		if(StringUtils.isBlank(scdhs)){
+			throw new BusinessException("参数不合法");
+		}
+		carTestService.backCTs(inst, getLoginInfo(request), scdhs);
+		return this.writeSuccMsg("已退回");
+	}
+	
+	/**
+	 * 批量复检不合格
+	 */
+	@RequestMapping("/unQuailyCTs")
+	@ResponseBody
+	public Map<String, Object> unQuailyCTs(HttpServletRequest request, @Valid ProcInstNode inst) throws Exception {
+		String scdhs = request.getParameter("scdhs");
+		if(StringUtils.isBlank(scdhs)){
+			throw new BusinessException("参数不合法");
+		}
+		carTestService.unQuailyCTs(inst, getLoginInfo(request), scdhs);
+		return this.writeSuccMsg("已保存复检不合格信息");
 	}
 	
 	/**

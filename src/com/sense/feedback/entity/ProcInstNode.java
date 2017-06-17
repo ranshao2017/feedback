@@ -33,6 +33,8 @@ public class ProcInstNode implements Serializable {
 	private String usrNam;//用户名称
 	@Column(name = "TS")
 	private Date ts;//处理时间
+	@Column(name = "CREATETIME")
+	private Date createTime;//该环节产生时间
 	@Column(name = "SUBMITTIME")
 	private Date submitTime;//提交至下一环节时间时间
 	
@@ -83,6 +85,12 @@ public class ProcInstNode implements Serializable {
 	}
 	public void setTs(Date ts) {
 		this.ts = ts;
+	}
+	public Date getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
 	}
 	public Date getSubmitTime() {
 		return submitTime;

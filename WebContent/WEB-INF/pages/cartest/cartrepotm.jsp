@@ -11,7 +11,7 @@
 	<div region="north" border="false">
 		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
-			<input title="质检系统是否入库" name="repoinfo" syscode="YESNO" class="easyui-combobox" rootflag="root" panelHeight="auto"/>
+			<input title="生产一线通是否入库" name="repoinfo" syscode="YESNO" class="easyui-combobox" rootflag="root" panelHeight="auto"/>
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryRepo()">检索</a>
 		</form>
 	</div>
@@ -20,6 +20,7 @@
            	<div class="perm-panel" >
            		<a id="0ZCTS010501" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
            		<a id="0ZCTS010701" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -98,9 +99,17 @@
 				width : 100,
 				title : "备注"
 			} ] ],
+			onClickCell:function(rowIndex, field, value){
+				if('pz' == field){
+					$('#pzForm [name=pz]').text(value);
+					$('#pz_div').window('open');
+				}
+			},
 			onDblClickRow:function(rowIndex, rowData){
-				$('#pzForm').form('setData', rowData);
-				$('#pz_div').window('open');
+				repoInfo();
+			},
+			onLoadSuccess:function(data){
+				$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		

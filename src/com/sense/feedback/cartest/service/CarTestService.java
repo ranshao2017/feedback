@@ -38,4 +38,16 @@ public interface CarTestService {
 
 	public PageInfo queryRepoPage(PageInfo pageInfo, Map<String, String> paras) throws Exception;
 
+	public void submitTCs(ProcInst inst, LoginInfo loginInfo, String scdhs) throws Exception;
+
+	public void submitCTs(ProcInstNode inst, LoginInfo loginInfo, String scdhs) throws Exception;
+
+	public void backCT(ProcInstNode inst, LoginInfo loginInfo) throws Exception;
+
+	public void backCTs(ProcInstNode inst, LoginInfo loginInfo, String scdhs) throws Exception;
+
+	public void unQuailyCT(ProcInstNode inst, LoginInfo loginInfo) throws Exception;
+
+	public void unQuailyCTs(ProcInstNode inst, LoginInfo loginInfo, String scdhs) throws Exception;
+
 }

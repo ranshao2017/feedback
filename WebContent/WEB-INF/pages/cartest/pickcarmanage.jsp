@@ -18,7 +18,8 @@
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010101" class="easyui-linkbutton" iconCls="icon-tab" plain="true" onclick="pickcar()">接车</a>
+           		<a id="0ZCTS010101" class="easyui-linkbutton" iconCls="icon-tab" plain="true" onclick="pickcars()">接车</a>
+           		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
 		<table id="pc_DG"></table>
@@ -43,12 +44,13 @@
 			toolbar:"#tb",
 			border:false,
 			fitColumns:true,
-			singleSelect:true,
+			singleSelect:false,
 			pagination : true,
 			rownumbers : true,
 			striped:true,
 			pageSize : 30,
 			pageList : [ 30,50,100 ],
+			frozenColumns:[[{field:'ck',checkbox:true}]],
 			columns : [ [  {
 				field : "dph",
 				width : 60,
@@ -85,7 +87,10 @@
 				}
 			},
 			onDblClickRow:function(rowIndex, rowData){
-				pickcar();
+				pickcar(rowData);
+			},
+			onLoadSuccess:function(data){
+				$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		
@@ -99,15 +104,31 @@
 	    $('#pc_DG').datagrid("clearSelections");
 	}
 	
-	function pickcar(){
-		var proRow = $("#pc_DG").datagrid("getSelected");
+	function pickcar(rowData){
+		var url = '${app}/cartest/forwardPickCar.do';
+		ctrl.openWin(url, {'scdh':rowData.scdh}, 650, 480, "接车");
+	}
+	
+	function pickcars(){
+		var proRow = $("#pc_DG").datagrid("getChecked");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
-		var url = '${app}/cartest/forwardPickCar.do';
-		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 480, "接车");
+		if(proRow.length > 1){
+			var scdhs = "";
+			for(var i = 0; i < proRow.length; i ++){
+				if(scdhs.length > 0){
+					scdhs += ",";
+				}
+				scdhs += proRow[i].scdh;
+			}
+			var url = '${app}/cartest/forwardPickCars.do';
+			ctrl.openWin(url, {'scdhs':scdhs}, 600, 300, "批量接车");
+		}else{
+			var url = '${app}/cartest/forwardPickCar.do';
+			ctrl.openWin(url, {'scdh':proRow[0].scdh}, 650, 480, "接车");
+		}
 	}
-	
 </script>
 </html>

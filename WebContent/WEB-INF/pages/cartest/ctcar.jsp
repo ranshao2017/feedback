@@ -18,6 +18,14 @@
 					</form>
 				</div>
 				<div region="south" style="text-align:center;padding:3px;">
+					<c:if test="${unQuailyBtn != null }">
+						<a class="easyui-linkbutton" onClick="unQuailyCT(this);" iconCls="icon-book-previous">${unQuailyBtn }</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</c:if>
+					<c:if test="${backBtn != null }">
+						<a class="easyui-linkbutton" onClick="backCT(this);" iconCls="icon-book-previous">${backBtn }</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</c:if>
 					<a class="easyui-linkbutton" onClick="saveCT(this);" iconCls="icon-save">保 存</a>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<a class="easyui-linkbutton" onClick="submitCT(this);" iconCls="icon-ok">${param.nextbtn }</a>
@@ -147,9 +155,14 @@
 		      	width : 60,
 		     	title : "登记人"
 	       	}, {
-		        field : "ts",
-		      	width : 80,
-		     	title : "登记时间",
+		        field : "createTime",
+		      	width : 100,
+		     	title : "开始时间",
+		     	formatter:ctrl.dateTimeStringFormat
+	       	}, {
+		        field : "submitTime",
+		      	width : 100,
+		     	title : "结束时间",
 		     	formatter:ctrl.dateTimeStringFormat
 	       	}
 		] ]
@@ -172,6 +185,28 @@
 		var param = $("#formDJ").form("getData");
 		param.scdh = $("#scdh").val();
     	ctrl.operPost("${app}/cartest/submitCT.do", param, function(paraMap){
+    		parent.queryCT();
+      		parent.ctrl.closeWin();
+    	}, obj);
+	}
+	
+	function backCT(obj){
+		var valid = $("#formDJ").form("validate");
+    	if(!valid) return;
+		var param = $("#formDJ").form("getData");
+		param.scdh = $("#scdh").val();
+    	ctrl.operPost("${app}/cartest/backCT.do", param, function(paraMap){
+    		parent.queryCT();
+      		parent.ctrl.closeWin();
+    	}, obj);
+	}
+	
+	function unQuailyCT(obj){
+		var valid = $("#formDJ").form("validate");
+    	if(!valid) return;
+		var param = $("#formDJ").form("getData");
+		param.scdh = $("#scdh").val();
+    	ctrl.operPost("${app}/cartest/unQuailyCT.do", param, function(paraMap){
     		parent.queryCT();
       		parent.ctrl.closeWin();
     	}, obj);
