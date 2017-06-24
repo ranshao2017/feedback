@@ -17,7 +17,7 @@ import com.sense.frame.pub.model.PageInfo;
 public class ComplexDao extends BaseDAO {
 
 	public PageInfo queryCarTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
-		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where STATUS <> :status ");
+		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where STATUS not in ('0', '4') ");
 		String dph = paras.get("dph");
 		if(StringUtils.isNotBlank(dph)){
 			sql.append(" and DPH = :dph");
@@ -28,7 +28,6 @@ public class ComplexDao extends BaseDAO {
 		}
 		sql.append(" order by STATUS");
 		SQLEntity entity = new SQLEntity(sql.toString());
-		entity.setObject("status", EnumProcNode.rk.getCode());
 		if(StringUtils.isNotBlank(dph)){
 			entity.setObject("dph", dph);
 		}

@@ -45,9 +45,6 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 
 	@Override
 	public ProcInstDto queryProcInst(String dph, String userid) throws Exception {
-		Usr usr = commonDao.findEntityByID(Usr.class, userid);
-		Org org = commonDao.findEntityByID(Org.class, usr.getOrgID());
-		
 		if(StringUtils.isBlank(dph)){
 			return null;
 		}
@@ -55,9 +52,15 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		if(null == procInst){
 			return null;
 		}
-		if(!procInst.getStatus().equals(org.getProcs())){
-			return null;
+		
+		if(StringUtils.isNotBlank(userid)){
+			Usr usr = commonDao.findEntityByID(Usr.class, userid);
+			Org org = commonDao.findEntityByID(Org.class, usr.getOrgID());
+			if(!procInst.getStatus().equals(org.getProcs())){
+				return null;
+			}
 		}
+		
 		ProcInstDto dto = new  ProcInstDto();
 		dto.setBz(procInst.getBz());
 		dto.setCx(procInst.getCx());
@@ -74,8 +77,16 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		dto.setStatus(procInst.getStatus());
 		dto.setXxsj(sdf.format(procInst.getXxsj()));
 		if(StringUtils.isNotBlank(procInst.getXzOrgID())){
-			Org xzorg = commonDao.findEntityByID(Org.class, procInst.getXzOrgID());
-			dto.setXzOrg(xzorg.getOrgNam());
+			String[] orgArr = procInst.getXzOrgID().split(",");
+			StringBuffer orgSB = new StringBuffer();
+			for (int i = 0; i < orgArr.length; i++) {
+				Org xzorg = commonDao.findEntityByID(Org.class, orgArr[i]);
+				if(i > 0){
+					orgSB.append(",");
+				}
+				orgSB.append(xzorg.getOrgNam());
+			}
+			dto.setXzOrg(orgSB.toString());
 		}else{
 			dto.setXzOrg("");
 		}
@@ -121,8 +132,12 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			node.setId(dBUtil.getCommonId());
 			node.setScdh(scdh);
 			node.setProNode(proc.getStatus());
-			ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
-			node.setCreateTime(preNode.getSubmitTime());
+			if(EnumProcNode.ts.getCode().equals(proc.getStatus())){//调试保存，将接车时间保存为该环节开始时间
+				node.setCreateTime(proc.getJcsj());
+			}else{
+				ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
+				node.setCreateTime(preNode.getSubmitTime());
+			}
 		}
 		node.setCarSet(carseat);
 		node.setDescr(descr);
@@ -145,8 +160,12 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			node.setId(dBUtil.getCommonId());
 			node.setScdh(scdh);
 			node.setProNode(proc.getStatus());
-			ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
-			node.setCreateTime(preNode.getSubmitTime());
+			if(EnumProcNode.ts.getCode().equals(proc.getStatus())){//调试保存，将接车时间保存为该环节开始时间
+				node.setCreateTime(proc.getJcsj());
+			}else{
+				ProcInstNode preNode = carTestDao.queryPreInstNode(scdh, proc.getStatus());
+				node.setCreateTime(preNode.getSubmitTime());
+			}
 		}
 		node.setCarSet(carseat);
 		node.setDescr(descr);
@@ -157,6 +176,10 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
 		node.setUsrNam(usr.getUsrNam());
 		commonDao.saveOrUpdateEntity(node);
+		
+		if(EnumProcNode.sy.getCode().equals(proc.getStatus())){//记录入库时间
+			proc.setRksj(nowDate);
+		}
 		
 		proc.setStatus(String.valueOf(Integer.parseInt(proc.getStatus()) + 1));
 		proc.setProcesSta(EnumProcesSta.xtj.getCode());
