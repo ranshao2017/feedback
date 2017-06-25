@@ -109,7 +109,7 @@
 				repoInfo();
 			},
 			onLoadSuccess:function(data){
-				$("#total_span").text('检索出记录总数：' + data.total);
+				//$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		
@@ -121,6 +121,10 @@
 	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryRepoPage.do";
 	    $('#pc_DG').datagrid("load", param);
 	    $('#pc_DG').datagrid("clearSelections");
+	    
+	    ctrl.operPost("${app}/complex/queryStaCount.do", $("#queryForm").form("getData"), function(paraMap){
+	    	 $("#total_span").text('调试车辆总数：' + paraMap.tsCount + "，故障排除车辆总数：" + paraMap.gzCount + "，送验车辆总数：" + paraMap.syCount);
+	    });
 	}
 	
 	function repoInfo(){

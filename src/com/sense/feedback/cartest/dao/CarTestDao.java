@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sense.feedback.entity.PaiChan;
 import com.sense.feedback.entity.ProcInst;
 import com.sense.feedback.entity.ProcInstNode;
+import com.sense.feedback.entity.ProcInstReply;
 import com.sense.feedback.enumdic.EnumYesNo;
 import com.sense.frame.base.BaseDAO;
 import com.sense.frame.common.util.BeanUtil;
@@ -139,7 +140,10 @@ public class CarTestDao extends BaseDAO {
 
 	public PageInfo queryRepoPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
 		StringBuffer sql = new StringBuffer();
-		sql.append("select pro.*,case when rk.rksj is null then '未入库' when rk.rksj is not null then '已入库' else '未知' end as repoinfo from BIZ_PROCINST pro, biz_rkinfo rk where pro.scdh = rk.scdh ");
+		sql.append("select pro.*,case when rk.rksj is null then '未入库' when rk.rksj is not null then '已入库' else '未知' end as repoinfo,"
+				+ "case when pro.status <> '4' and rk.rksj is not null then 1 "
+				+ "     when pro.status = '4' and rk.rksj is null then 2 "
+				+ "	    else 3 end as repoorder from BIZ_PROCINST pro, biz_rkinfo rk where pro.scdh = rk.scdh ");
 		String repoinfo = paras.get("repoinfo");
 		if(StringUtils.isNotBlank(repoinfo)){
 			if(EnumYesNo.yes.getCode().equals(repoinfo)){
@@ -152,7 +156,7 @@ public class CarTestDao extends BaseDAO {
 		if(StringUtils.isNotBlank(dph)){
 			sql.append(" and pro.DPH = :dph");
 		}
-		sql.append(" order by pro.STATUS");
+		sql.append(" order by repoorder,pro.STATUS");
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(dph)){
 			entity.setObject("dph", dph);
@@ -192,6 +196,92 @@ public class CarTestDao extends BaseDAO {
 		SQLQuery query = getCurrentSession().createSQLQuery(sql);
 		query.setString("status", status);
 		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
+	}
+
+	public PageInfo queryXZCTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
+		StringBuffer sql = new StringBuffer();
+		sql.append("select * from BIZ_PROCINST where 1 = 1 ");
+		String scdh = paras.get("scdh");
+		if(StringUtils.isNotBlank(scdh)){
+			sql.append(" and SCDH = :scdh");
+		}
+		String dph = paras.get("dph");
+		if(StringUtils.isNotBlank(dph)){
+			sql.append(" and DPH = :dph");
+		}
+		String xzOrgID = paras.get("xzOrgID");
+		if(StringUtils.isNotBlank(xzOrgID)){
+			sql.append(" and XZORGID like :xzOrgID");
+		}
+		String ddh = paras.get("ddh");
+		if(StringUtils.isNotBlank(ddh)){
+			sql.append(" and DDH = :ddh");
+		}
+		SQLEntity entity = new SQLEntity(sql.toString());
+		if(StringUtils.isNotBlank(scdh)){
+			entity.setObject("scdh", scdh);
+		}
+		if(StringUtils.isNotBlank(dph)){
+			entity.setObject("dph", dph);
+		}
+		if(StringUtils.isNotBlank(xzOrgID)){
+			entity.setObject("xzOrgID", "%" + xzOrgID + "%");
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			entity.setObject("ddh", ddh);
+		}
+		return executePageQuery(pageInfo, entity, ProcInst.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<ProcInstReply> queryReplyList(String scdh) throws Exception{
+		String hql = "from ProcInstReply where scdh = :scdh order by createTime";
+		Query query = getCurrentSession().createQuery(hql);
+		query.setString("scdh", scdh);
+		return query.list();
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<ProcInst> queryExportCT(Map<String, String> paras) throws Exception{
+		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where 1 = 1");
+		String status = paras.get("status");
+		if(StringUtils.isNotBlank(status)){
+			sql.append(" and STATUS = :status");
+		}
+		String scdh = paras.get("scdh");
+		if(StringUtils.isNotBlank(scdh)){
+			sql.append(" and SCDH = :scdh");
+		}
+		String dph = paras.get("dph");
+		if(StringUtils.isNotBlank(dph)){
+			sql.append(" and DPH = :dph");
+		}
+		String ddh = paras.get("ddh");
+		if(StringUtils.isNotBlank(ddh)){
+			sql.append(" and DDH = :ddh");
+		}
+		String trq = paras.get("trq");
+		if(StringUtils.isNotBlank(trq)){
+			if(EnumYesNo.yes.getCode().equals(trq)){
+				sql.append(" and (CX like '%L/%' or CX like '%C/%')");
+			}else{
+				sql.append(" and (CX not like '%L/%' and CX not like '%C/%')");
+			}
+		}
+		SQLQuery query = getCurrentSession().createSQLQuery(sql.toString());
+		if(StringUtils.isNotBlank(status)){
+			query.setString("status", status);
+		}
+		if(StringUtils.isNotBlank(scdh)){
+			query.setString("scdh", scdh);
+		}
+		if(StringUtils.isNotBlank(dph)){
+			query.setString("dph", dph);
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			query.setString("ddh", ddh);
+		}
+		return query.addEntity(ProcInst.class).list();
 	}
 
 }

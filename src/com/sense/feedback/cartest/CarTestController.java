@@ -1,9 +1,22 @@
 package com.sense.feedback.cartest;
 
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+
+import jxl.Workbook;
+import jxl.write.DateFormats;
+import jxl.write.DateTime;
+import jxl.write.Label;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +120,10 @@ public class CarTestController extends BaseController {
 	@ResponseBody
 	public Map<String, Object> saveXx(HttpServletRequest request, @Valid ProcInst inst) throws Exception {
 		String qjData = request.getParameter("qjData");
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			String xzOrg = inst.getXzOrgID().replaceAll("-", ",");
+			inst.setXzOrgID(xzOrg);
+		}
 		carTestService.saveXx(inst, getLoginInfo(request), qjData);
 		return this.writeSuccMsg("已保存缺件不可调车");
 	}
@@ -384,7 +401,122 @@ public class CarTestController extends BaseController {
 	 */
 	@RequestMapping("/forwardXzTC")
 	public String forwardXzTC(HttpServletRequest request, ModelMap map) throws Exception {
-		map.put("xzOrgID", getLoginInfo(request).getOrgId());
+		boolean tsOrg = carTestService.queryTsFlag(getLoginInfo(request).getOrgId());
+		map.put("tsOrg", tsOrg);
+		if(!tsOrg){
+			map.put("xzOrgID", getLoginInfo(request).getOrgId());
+		}
 		return "cartest/xzcartm";	
 	}
+	
+	/**
+	 * 分页检索协助调车信息
+	 */
+	@RequestMapping("/queryXZCTPage")
+	@ResponseBody     
+	public PageInfo queryXZCTPage(HttpServletRequest request) throws Exception{	
+		Map<String, String> paras = getRequestPara(request);
+		return carTestService.queryXZCTPage(getPageInfo(request), paras);
+	}
+	
+	/**
+	 * 协助详情
+	 */
+	@RequestMapping("/forwardXzInfo")
+	public String forwardXzInfo(HttpServletRequest request, ModelMap map) throws Exception {
+		String scdh = request.getParameter("scdh");
+		ProcInst inst = carTestService.queryProcInst(scdh);
+		String instJson = JSON.toJSONStringWithDateFormat(inst, "yyyy-MM-dd HH:mm:ss");
+		map.put("instJson", instJson);
+		if(EnumYesNo.yes.getCode().equals(inst.getQjFlag())){
+			String qjJson = carTestService.queryQJData(scdh);
+			map.put("qjJson", qjJson);
+		}
+		String preNodeListJson = carTestService.queryPreInstNodeList(scdh, inst.getStatus());
+		if(StringUtils.isNotBlank(preNodeListJson)){
+			map.put("preNodeListJson", preNodeListJson);
+		}
+		map.put("closeReply", inst.getCloseFlag());
+		String replyListJson = carTestService.queryReplyList(scdh);
+		if(StringUtils.isNotBlank(replyListJson)){
+			map.put("replyListJson", replyListJson);
+		}
+		return "cartest/xzcarinfo";
+	}
+	
+	/**
+	 * 提交回复
+	 */
+	@RequestMapping("/submitReply")
+	@ResponseBody
+	public Map<String, Object> submitReply(HttpServletRequest request) throws Exception {
+		String scdh = request.getParameter("scdh");
+		String descr = request.getParameter("descr");
+		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(descr)){
+			throw new BusinessException("参数不合法");
+		}
+		carTestService.submitReply(scdh, descr, getLoginInfo(request));
+		return this.writeSuccMsg("已提交回复");
+	}
+	
+	/**
+	 * 关闭回复
+	 */
+	@RequestMapping("/closeReply")
+	@ResponseBody
+	public Map<String, Object> closeReply(HttpServletRequest request) throws Exception {
+		String scdh = request.getParameter("scdh");
+		if(StringUtils.isBlank(scdh)){
+			throw new BusinessException("参数不合法");
+		}
+		carTestService.closeReply(scdh);
+		return this.writeSuccMsg("已关闭回复");
+	}
+	
+	/**
+	 * 导出
+	 */
+	@RequestMapping("/exportCT")
+	public void exportCT(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Map<String, String> paraMap = getRequestPara(request);
+		List<ProcInst> instList = carTestService.queryExportCT(paraMap);
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+	    OutputStream os = response.getOutputStream();//取得输出流
+	    response.reset();//清空输出流
+	    response.setCharacterEncoding("UTF-8");//设置相应内容的编码格式
+	    String fileName = java.net.URLEncoder.encode(EnumProcNode.getLabelByCode(paraMap.get("status")) + "记录" + df.format(new Date()), "UTF-8");
+	    response.setHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes("UTF-8"), "GBK") + ".xls");
+	    response.setContentType("application/msexcel");//定义输出类型
+	    
+        WritableWorkbook workbook = Workbook.createWorkbook(os);//创建工作薄
+        WritableSheet sheet = workbook.createSheet(EnumProcNode.getLabelByCode(paraMap.get("status")) + "记录", 0);//创建新的一页
+        //创建要显示的内容,创建一个单元格，第一个参数为列坐标，第二个参数为行坐标，第三个参数为内容
+        String[] titleArr = new String[] {"底盘号", "随车单号", "车型", "订单号", "下线时间", "发动机", "配置", "是否缺件", "备注"};
+        for (int i = 0; i < titleArr.length; i++) {
+        	Label title = new Label(i, 0, titleArr[i]);
+            sheet.addCell(title);
+		}
+        
+        for(int i = 0; i < instList.size(); i ++){
+        	ProcInst inst = instList.get(i);
+        	sheet.addCell(new Label(0, i + 1, inst.getDph()));
+        	sheet.addCell(new Label(1, i + 1, inst.getScdh()));
+        	sheet.addCell(new Label(2, i + 1, inst.getCx()));
+        	sheet.addCell(new Label(3, i + 1, inst.getDdh()));
+        	
+        	WritableCellFormat wcf = new WritableCellFormat(DateFormats.FORMAT1);
+            DateTime createDt = new DateTime(4, i + 1, inst.getJcsj(), wcf);
+            sheet.addCell(createDt);//下线时间
+            
+            sheet.addCell(new Label(5, i + 1, inst.getFdj()));
+            sheet.addCell(new Label(6, i + 1, inst.getPz()));
+            sheet.addCell(new Label(7, i + 1, EnumYesNo.getLabelByCode(inst.getQjFlag())));
+            sheet.addCell(new Label(8, i + 1, inst.getBz()));
+        }
+        
+        workbook.write();
+        workbook.close();
+        os.close();
+	}
+	
 }

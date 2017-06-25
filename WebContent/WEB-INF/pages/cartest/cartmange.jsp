@@ -12,7 +12,7 @@
 		<form id="queryForm" columns='4' class="easyui-form">
 			<input title="底盘号" name="dph"/>
 			<input title="订单号" name="ddh"/>
-			<input title="天然气车" name="trq" syscode="YESNO" class="easyui-combobox"  panelHeight="auto" editable="false"/>
+			<input title="天然气车" name="trq" syscode="YESNO" class="easyui-combobox" rootflag="root" panelHeight="auto" editable="false"/>
 			<input type="hidden" name="status" value="${status }"/>
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
@@ -23,6 +23,7 @@
            		<a id="0ZCTS010201" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('调试','故障排除')">调试</a>
            		<a id="0ZCTS010301" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('故障排除','送验')">故障排除</a>
            		<a id="0ZCTS010401" class="easyui-linkbutton" iconCls="icon-ipod" plain="true" onclick="ctcars('送验','入库')">送验</a>
+           		<a show="true" class="easyui-linkbutton" iconCls="icon-download-file" plain="true" onclick="exportct(this)">导出</a>
            		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
@@ -140,6 +141,13 @@
 	    			 " 条 （LNG " + paraMap.lngCount + " 条，CNG " + paraMap.cngCount + " 条，非天然气 " + 
 	    			 (paraMap.ctCount - paraMap.lngCount - paraMap.cngCount) + " 条）");
 	    });
+	}
+	
+	function exportct(obj){
+		$(obj).attr("disabled", false);
+		$("#queryForm").attr("target", "_blank");
+		$("#queryForm").attr("action", "${app}/cartest/exportCT.do");
+		$("#queryForm").submit();
 	}
 	
 	function ctcar(rowData, title, nextbtn){

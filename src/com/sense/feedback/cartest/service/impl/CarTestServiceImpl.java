@@ -19,6 +19,7 @@ import com.sense.feedback.cartest.service.CarTestService;
 import com.sense.feedback.entity.PaiChan;
 import com.sense.feedback.entity.ProcInst;
 import com.sense.feedback.entity.ProcInstNode;
+import com.sense.feedback.entity.ProcInstReply;
 import com.sense.feedback.entity.QueJian;
 import com.sense.feedback.enumdic.EnumProcNode;
 import com.sense.feedback.enumdic.EnumProcesSta;
@@ -27,6 +28,7 @@ import com.sense.frame.base.BaseService;
 import com.sense.frame.base.BusinessException;
 import com.sense.frame.pub.global.LoginInfo;
 import com.sense.frame.pub.model.PageInfo;
+import com.sense.sys.entity.Org;
 
 @Service
 public class CarTestServiceImpl extends BaseService implements CarTestService {
@@ -71,6 +73,11 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 		}else{
 			inst.setQjFlag(EnumYesNo.no.getCode());
 		}
+		
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			inst.setCloseFlag(EnumYesNo.no.getCode());//协助部门讨论开关
+			inst.setReplyCount(0);
+		}
 		commonDao.saveEntity(inst);
 	}
 
@@ -96,6 +103,12 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 		}else{
 			inst.setQjFlag(EnumYesNo.no.getCode());
 		}
+		
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			inst.setCloseFlag(EnumYesNo.no.getCode());//协助部门讨论开关
+			inst.setReplyCount(0);
+		}
+		
 		commonDao.saveEntity(inst);
 	}
 
@@ -260,6 +273,11 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 			dbInst.setJcUsrID(loginInfo.getUserId());
 			dbInst.setJcUsrNam(loginInfo.getUserNam());
 			dbInst.setQjFlag(EnumYesNo.no.getCode());
+			
+			if(StringUtils.isNotBlank(inst.getXzOrgID())){
+				dbInst.setCloseFlag(EnumYesNo.no.getCode());
+				inst.setReplyCount(0);
+			}
 			
 			commonDao.saveEntity(dbInst);
 		}
@@ -430,6 +448,63 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 		paras.put("lngCount", lngCount);
 		paras.put("cngCount", cngCount);
 		return paras;
+	}
+
+	@Override
+	public PageInfo queryXZCTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception {
+		return carTestDao.queryXZCTPage(pageInfo, paras);
+	}
+
+	@Override
+	public String queryReplyList(String scdh) throws Exception {
+		List<ProcInstReply> list = carTestDao.queryReplyList(scdh);
+		if(CollectionUtils.isEmpty(list)){
+			return null;
+		}
+		PageInfo pi = new PageInfo();
+		pi.setTotal("" + list.size());
+		pi.setRows(list);
+		return JSON.toJSONString(pi);
+	}
+
+	@Override
+	public void submitReply(String scdh, String descr, LoginInfo loginInfo) throws Exception {
+		ProcInstReply reply = new ProcInstReply();
+		reply.setCreateTime(new Date());
+		reply.setDescr(descr);
+		reply.setScdh(scdh);
+		reply.setXzID(dBUtil.getCommonId());
+		reply.setXzOrgID(loginInfo.getOrgId());
+		reply.setXzOrgNam(loginInfo.getOrgNam());
+		reply.setXzUsrID(loginInfo.getUserId());
+		reply.setXzUsrNam(loginInfo.getUserNam());
+		commonDao.saveEntity(reply);
+		
+		ProcInst inst = commonDao.findEntityByID(ProcInst.class, scdh);
+		int oldCount = inst.getReplyCount() == null ? 0 : inst.getReplyCount();
+		inst.setReplyCount(oldCount + 1);
+		commonDao.updateEntity(inst);
+	}
+
+	@Override
+	public boolean queryTsFlag(String orgId) throws Exception {
+		Org org = commonDao.findEntityByID(Org.class, orgId);
+		if(StringUtils.isNotBlank(org.getProcs()) && org.getProcs().indexOf(EnumProcNode.ts.getCode()) >= 0){
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public void closeReply(String scdh) throws Exception {
+		ProcInst inst = commonDao.findEntityByID(ProcInst.class, scdh);
+		inst.setCloseFlag(EnumYesNo.yes.getCode());
+		commonDao.updateEntity(inst);
+	}
+
+	@Override
+	public List<ProcInst> queryExportCT(Map<String, String> paraMap) throws Exception {
+		return carTestDao.queryExportCT(paraMap);
 	}
 
 }

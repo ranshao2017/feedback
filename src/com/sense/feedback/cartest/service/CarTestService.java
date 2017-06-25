@@ -1,5 +1,6 @@
 package com.sense.feedback.cartest.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sense.feedback.entity.PaiChan;
@@ -51,5 +52,17 @@ public interface CarTestService {
 	public void unQuailyCTs(ProcInstNode inst, LoginInfo loginInfo, String scdhs) throws Exception;
 
 	public Map<String, Object> queryCTCount(String status) throws Exception;
+
+	public PageInfo queryXZCTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception;
+
+	public String queryReplyList(String scdh) throws Exception;
+
+	public void submitReply(String scdh, String descr, LoginInfo loginInfo) throws Exception;
+
+	public boolean queryTsFlag(String orgId) throws Exception;
+
+	public void closeReply(String scdh) throws Exception;
+
+	public List<ProcInst> queryExportCT(Map<String, String> paraMap) throws Exception;
 
 }

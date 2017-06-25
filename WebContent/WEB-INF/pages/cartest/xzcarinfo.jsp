@@ -9,6 +9,26 @@
 </head>
 <body>
 	<div id="tabspick" class="easyui-tabs" fit="true">
+		<div title="协助回复" data-options="closable:false">
+			<div class="easyui-layout" fit="true">
+				<div region="center" border="false">
+					<table id="reply_DG"></table>
+				</div>
+				<div region="south" border="false" style="text-align:center;" class="htborder-top">
+					<c:if test="${closeReply == '1' }">
+						<br>
+						回复功能已关闭
+					</c:if>
+					<c:if test="${closeReply == '0' }">
+						<form id="formReply" columns='3' class="easyui-form">
+							<input type="hidden" name="scdh" value="${param.scdh }">
+							<textarea colspan="2" title="回复" name="descr" rows='4' style="width:400px;"></textarea>
+							<a class="easyui-linkbutton" onClick="submitReply(this);" iconCls="icon-ok">提交回复</a>
+						</form>
+					</c:if>
+				</div>
+			</div>
+		</div>
 		<div title="接车信息" data-options="closable:false">
 			<div class="easyui-layout" fit="true">
 				<div region="center" border="false" style="padding:6px;">
@@ -47,8 +67,8 @@
 <script type="text/javascript">
 	var pageProc = eval(${instJson});
 	var pageQJ = '${qjJson}';
-	var pageNode = eval(${nodeJson});
 	var pagePreNodeList = '${preNodeListJson}';
+	var pageReplyList = '${replyListJson}';
 	
 	$(document).ready(function() {
 		$("#formCT").form('setData', pageProc);
@@ -65,8 +85,8 @@
 		}else{
 			$("#proNode_DG").datagrid("loadData", JSON.parse(pagePreNodeList));
 		}
-		if(pageNode){
-			$("#formDJ").form('setData', pageNode);
+		if(pageReplyList){
+			$("#reply_DG").datagrid("loadData", JSON.parse(pageReplyList));
 		}
 		$('#tabspick').tabs('keyDownTab');
 	});
@@ -132,17 +152,55 @@
 		      	width : 60,
 		     	title : "登记人"
 	       	}, {
-		        field : "createTime",
-		      	width : 100,
-		     	title : "开始时间",
-		     	formatter:ctrl.dateTimeStringFormat
-	       	}, {
-		        field : "submitTime",
-		      	width : 100,
-		     	title : "结束时间",
+		        field : "ts",
+		      	width : 80,
+		     	title : "登记时间",
 		     	formatter:ctrl.dateTimeStringFormat
 	       	}
 		] ]
 	});
+	
+	$("#reply_DG").datagrid({
+		idField : "id",
+		loadMsg : '数据加载中,请稍后...',
+	  	fit:true,
+	   	border:false,
+	  	fitColumns:true,
+	   	singleSelect:true,
+	  	pagination : false,
+	   	rownumbers : true,
+	  	striped:true,
+	  	nowrap:false,
+	   	columns : [ [ 
+	   		{
+	    		field : "xzOrgNam",
+	         	width : 50,
+	         	title : "协助部门"
+	       	}, {
+		        field : "xzUsrNam",
+		      	width : 60,
+		     	title : "回复人"
+	       	}, {
+		        field : "descr",
+		      	width : 120,
+		     	title : "回复内容"
+	       	}, {
+		        field : "createTime",
+		      	width : 80,
+		     	title : "回复时间",
+		     	formatter:ctrl.dateTimeStringFormat
+	       	}
+		] ]
+	});
+	
+	function submitReply(obj){
+		var valid = $("#formReply").form("validate");
+    	if(!valid) return;
+		var param = $("#formReply").form("getData");
+    	ctrl.operPost("${app}/cartest/submitReply.do", param, function(paraMap){
+    		parent.queryXzTc();
+      		parent.ctrl.closeWin();
+    	}, obj);
+	}
 </script>
 </html>

@@ -13,14 +13,16 @@
 			<input title="底盘号" name="dph"/>
 			<input title="订单号" name="ddh"/>
 			<input type="hidden" name="xzOrgID" value="${xzOrgID }">
-			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryRepo()">检索</a>
+			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryXzTc()">检索</a>
 		</form>
 	</div>
 	<div region="center" border="false" class="htborder-top">
 	    <div id="tb">
            	<div class="perm-panel" >
-           		<a id="0ZCTS010501" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
-           		<a id="0ZCTS010701" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="repoInfo()">详情</a>
+           		<a id="0ZCTS010701" class="easyui-linkbutton" iconCls="icon-table" plain="true" onclick="xzInfo()">详情</a>
+           		<c:if test="${tsOrg == true }">
+           			<a show="true" class="easyui-linkbutton" iconCls="icon-cancel" plain="true" onclick="closeReply()">关闭协助回复</a>
+           		</c:if>
            		<span id="total_span" style="color:blue;margin-left:30px;font-weight:bold;"></span>
            	</div>
 		</div>
@@ -91,6 +93,10 @@
 				title : "是否缺件",
 				formatter:ctrl.dicConvert('YESNO') 
 			},{
+				field : "replyCount",
+				width : 50,
+				title : "回复数"
+			},{
 				field : "bz",
 				width : 100,
 				title : "备注"
@@ -102,31 +108,44 @@
 				}
 			},
 			onDblClickRow:function(rowIndex, rowData){
-				repoInfo();
+				xzInfo();
 			},
 			onLoadSuccess:function(data){
 				$("#total_span").text('检索出记录总数：' + data.total);
 			}
 		});
 		
-		setTimeout('queryRepo()', 200);
+		setTimeout('queryXzTc()', 200);
 	}
 	
-	function queryRepo(){
+	function queryXzTc(){
 	    var param = $("#queryForm").form("getData");
-	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryCTPage.do";
+	    $("#pc_DG").datagrid("options").url="${app}/cartest/queryXZCTPage.do";
 	    $('#pc_DG').datagrid("load", param);
 	    $('#pc_DG').datagrid("clearSelections");
 	}
 	
-	function repoInfo(){
+	function xzInfo(){
 		var proRow = $("#pc_DG").datagrid("getSelected");
 		if (!proRow) {
 			$.messager.alert("提示", "请先选择一条数据！", "info");
 			return;
 		}
-		var url = '${app}/cartest/forwardRepoInfo.do';
+		var url = '${app}/cartest/forwardXzInfo.do';
 		ctrl.openWin(url, {'scdh':proRow.scdh}, 650, 450, "详情");
+	}
+	
+	function closeReply(){
+		var proRow = $("#pc_DG").datagrid("getSelected");
+		if (!proRow) {
+			$.messager.alert("提示", "请先选择一条数据！", "info");
+			return;
+		}
+		
+		var param = {"scdh":proRow.scdh};
+    	ctrl.operPost("${app}/cartest/closeReply.do", param, function(paraMap){
+    		queryXzTc();
+    	});
 	}
 </script>
 </html>

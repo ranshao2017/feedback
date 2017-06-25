@@ -20,6 +20,7 @@ import com.sense.frame.pub.global.LoginInfo;
 import com.sense.frame.pub.model.PageInfo;
 import com.sense.frame.pub.model.TreeModel;
 import com.sense.sys.entity.Func;
+import com.sense.sys.entity.Org;
 import com.sense.sys.entity.ProcNode;
 import com.sense.sys.entity.Usr;
 import com.sense.sys.entity.UsrProcNode;
@@ -282,6 +283,11 @@ public class UserServiceImpl extends BaseService implements UserService {
 		logonUser.setUserCod(user.getUsrCod());
 		logonUser.setUserNam(user.getUsrNam());
 		logonUser.setOrgId(user.getOrgID());
+		
+		Org org = commonDao.findEntityByID(Org.class, user.getOrgID());
+		if(null != org){
+			logonUser.setOrgNam(org.getOrgNam());
+		}
 		
 		return logonUser;
 	}

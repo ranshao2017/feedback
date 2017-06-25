@@ -81,11 +81,11 @@ public class ComplexDao extends BaseDAO {
 		}
 		String jcsjStart = paras.get("jcsjStart");
 		if(StringUtils.isNotBlank(jcsjStart)){
-			sql.append(" and JCSJ >= CONVERT(datetime, :jcsjStart)");
+			sql.append(" and XXSJ >= CONVERT(datetime, :jcsjStart)");
 		}
 		String jcsjEnd = paras.get("jcsjEnd");
 		if(StringUtils.isNotBlank(jcsjEnd)){
-			sql.append(" and JCSJ < CONVERT(datetime, :jcsjEnd)");
+			sql.append(" and XXSJ < CONVERT(datetime, :jcsjEnd)");
 		}
 		String status = paras.get("status");
 		if(StringUtils.isNotBlank(status)){

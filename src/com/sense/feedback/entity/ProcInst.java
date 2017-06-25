@@ -52,6 +52,10 @@ public class ProcInst implements Serializable {
 	private String jcUsrNam;//接车用户名称
 	@Column(name = "PROCESSTA")
 	private String procesSta;//处理状态 新提交、处理保存、退回
+	@Column(name = "CLOSEFLAG")
+	private String closeFlag;//是否关闭协助部门讨论
+	@Column(name = "REPLYCOUNT")
+	private Integer replyCount;//协助部门讨论数
 	
 	@Transient
 	private String repoinfo;//质检系统入库状态
@@ -171,5 +175,17 @@ public class ProcInst implements Serializable {
 	}
 	public void setJgDay(Integer jgDay) {
 		this.jgDay = jgDay;
+	}
+	public String getCloseFlag() {
+		return closeFlag;
+	}
+	public void setCloseFlag(String closeFlag) {
+		this.closeFlag = closeFlag;
+	}
+	public Integer getReplyCount() {
+		return replyCount;
+	}
+	public void setReplyCount(Integer replyCount) {
+		this.replyCount = replyCount;
 	}
 }
