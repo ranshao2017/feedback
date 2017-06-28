@@ -54,10 +54,13 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		}
 		
 		if(StringUtils.isNotBlank(userid)){
-			Usr usr = commonDao.findEntityByID(Usr.class, userid);
-			Org org = commonDao.findEntityByID(Org.class, usr.getOrgID());
-			if(!procInst.getStatus().equals(org.getProcs())){
+			List<String> nodeList = appCtDao.queryOwnProcNode(userid);
+			if(CollectionUtils.isEmpty(nodeList)){
 				return null;
+			}else{
+				if(!nodeList.contains(procInst.getStatus())){
+					return null;
+				}
 			}
 		}
 		

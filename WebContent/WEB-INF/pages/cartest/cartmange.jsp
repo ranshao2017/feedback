@@ -9,10 +9,13 @@
 </head>
 <body class="easyui-layout">
 	<div region="north" border="false">
-		<form id="queryForm" columns='4' class="easyui-form">
+		<form id="queryForm" columns='3' class="easyui-form">
 			<input title="底盘号" name="dph"/>
 			<input title="订单号" name="ddh"/>
 			<input title="天然气车" name="trq" syscode="YESNO" class="easyui-combobox" rootflag="root" panelHeight="auto" editable="false"/>
+			<input title="故障描述" name="nodeDescr"/>
+			<input title="下线时间开始" name="jcsjStart"/>
+			<input title="下线时间结束" name="jcsjEnd"/>
 			<input type="hidden" name="status" value="${status }"/>
 			<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryCT()">检索</a>
 		</form>
@@ -89,6 +92,10 @@
 				width : 50,
 				title : "是否缺件",
 				formatter:ctrl.dicConvert('YESNO')
+			},{
+				field : "nodeDescr",
+				width : 100,
+				title : "故障描述"
 			},{
 				field : "bz",
 				width : 100,

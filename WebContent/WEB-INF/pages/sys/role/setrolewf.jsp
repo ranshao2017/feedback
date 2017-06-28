@@ -19,6 +19,7 @@
 
 <script type="text/javascript">
 	$(function(){
+		//$("#node_wfTree").tree({lines :true,checkbox:true,data:[{id:0,text:'接车'},{id:1,text:'调试'},{id:2,text:'故障排除'},{id:3,text:'送验'},{id:4,text:'入库'}]});
 		$("#node_wfTree").tree({
 			lines :true,
 			url : "${app}/sys/role/queryRoleWFTree.do?roleID=${param.roleID}",

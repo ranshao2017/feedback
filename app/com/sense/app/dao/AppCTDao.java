@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Component;
 
 import com.sense.feedback.entity.ProcInst;
@@ -56,6 +57,14 @@ public class AppCTDao extends BaseDAO {
 			}
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> queryOwnProcNode(String userid) throws Exception{
+		String sql = "select distinct nodeid from SYS_USR_ROLE sur,SYS_ROLE_PROC srp where sur.ROLEID = srp.ROLEID and sur.USRID = :userid";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("userid", userid);
+		return query.list();
 	}
 
 }

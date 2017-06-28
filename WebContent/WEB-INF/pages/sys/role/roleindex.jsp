@@ -15,7 +15,7 @@
 			    <a class="easyui-linkbutton" id="SYS00070002" onClick="manageRoleFnc(0);" icon="icon-add" plain="true">新增</a> 
 				<a class="easyui-linkbutton" id="SYS00070003" onClick="manageRoleFnc(1);" icon="icon-edit" plain="true">修改</a>
 				<a class="easyui-linkbutton" id="SYS00070004" onClick="delRoleFnc();" icon="icon-remove-edit" plain="true">删除</a>
-				<a class="easyui-linkbutton" id="SYS00070005" onClick="setRoleWF();" icon="icon-page-red" plain="true">配置反馈处理权限</a>
+				<a class="easyui-linkbutton" id="SYS00070005" onClick="setRoleWF();" icon="icon-page-red" plain="true">配置APP接车环节</a>
 			</div>
 		</div>
 	</div>
@@ -182,8 +182,8 @@ function delRoleFnc(){
 //配置反馈处理流程环节权限
 function setRoleWF(){
 	var url = '${app}/sys/role/forwardRoleWF.do';
-	var width = 370;
-	var height = 400;
+	var width = 320;
+	var height = 300;
 	var title = "配置反馈处理流程环节权限";
 	var paraMap ={};
 	var row = $("#dgRole").datagrid("getSelected");

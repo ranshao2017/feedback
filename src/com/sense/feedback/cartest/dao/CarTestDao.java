@@ -51,7 +51,10 @@ public class CarTestDao extends BaseDAO {
 	}
 
 	public PageInfo queryCTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
-		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where 1 = 1");
+		StringBuffer sql = new StringBuffer("");
+		sql.append("select BIZ_PROCINST.*,pnode.descr as nodedescr "
+							+ "from BIZ_PROCINST left join (select MAX(scdh) scdh,MAX(PRONODE) pronode,MAX(DESCR) descr from BIZ_PROCNODE group by SCDH,PRONODE) pnode"
+							+ "	   on BIZ_PROCINST.scdh = pnode.scdh and BIZ_PROCINST.status = pnode.proNode  where 1 = 1 ");
 		String status = paras.get("status");
 		if(StringUtils.isNotBlank(status)){
 			sql.append(" and STATUS = :status");
@@ -72,6 +75,18 @@ public class CarTestDao extends BaseDAO {
 		if(StringUtils.isNotBlank(ddh)){
 			sql.append(" and DDH = :ddh");
 		}
+		String nodeDescr = paras.get("nodeDescr");
+		if(StringUtils.isNotBlank(nodeDescr)){
+			sql.append(" and pnode.descr like :nodeDescr");
+		}
+		String jcsjStart = paras.get("jcsjStart");
+		if(StringUtils.isNotBlank(jcsjStart)){
+			sql.append(" and XXSJ >= CONVERT(datetime, :jcsjStart)");
+		}
+		String jcsjEnd = paras.get("jcsjEnd");
+		if(StringUtils.isNotBlank(jcsjEnd)){
+			sql.append(" and XXSJ < CONVERT(datetime, :jcsjEnd)");
+		}
 		String trq = paras.get("trq");
 		if(StringUtils.isNotBlank(trq)){
 			if(EnumYesNo.yes.getCode().equals(trq)){
@@ -80,6 +95,7 @@ public class CarTestDao extends BaseDAO {
 				sql.append(" and (CX not like '%L/%' and CX not like '%C/%')");
 			}
 		}
+		sql.append(" order by xxsj ");
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(status)){
 			entity.setObject("status", status);
@@ -95,6 +111,15 @@ public class CarTestDao extends BaseDAO {
 		}
 		if(StringUtils.isNotBlank(ddh)){
 			entity.setObject("ddh", ddh);
+		}
+		if(StringUtils.isNotBlank(jcsjStart)){
+			entity.setObject("jcsjStart", jcsjStart);
+		}
+		if(StringUtils.isNotBlank(jcsjEnd)){
+			entity.setObject("jcsjEnd", jcsjEnd);
+		}
+		if(StringUtils.isNotBlank(nodeDescr)){
+			entity.setObject("nodeDescr", "%" + nodeDescr + "%");
 		}
 		return executePageQuery(pageInfo, entity, ProcInst.class);
 	}

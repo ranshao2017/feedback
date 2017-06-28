@@ -20,7 +20,11 @@ public class ComplexDao extends BaseDAO {
 		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where STATUS not in ('0', '4') ");
 		String dph = paras.get("dph");
 		if(StringUtils.isNotBlank(dph)){
-			sql.append(" and DPH = :dph");
+			if(dph.length() == 5){
+				sql.append(" and DPH like :dph");
+			}else{
+				sql.append(" and DPH = :dph");
+			}
 		}
 		String ddh = paras.get("ddh");
 		if(StringUtils.isNotBlank(ddh)){
@@ -29,7 +33,11 @@ public class ComplexDao extends BaseDAO {
 		sql.append(" order by STATUS");
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(dph)){
-			entity.setObject("dph", dph);
+			if(dph.length() == 5){
+				entity.setObject("dph", "%" + dph);
+			}else{
+				entity.setObject("dph", dph);
+			}
 		}
 		if(StringUtils.isNotBlank(ddh)){
 			entity.setObject("ddh", ddh);

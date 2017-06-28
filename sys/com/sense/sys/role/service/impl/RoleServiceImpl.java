@@ -18,7 +18,6 @@ import com.sense.frame.pub.global.LoginInfo;
 import com.sense.frame.pub.model.PageInfo;
 import com.sense.frame.pub.model.TreeModel;
 import com.sense.sys.entity.Func;
-import com.sense.sys.entity.ProcNode;
 import com.sense.sys.entity.Role;
 import com.sense.sys.entity.RoleFunc;
 import com.sense.sys.entity.RoleProcNode;
@@ -193,9 +192,27 @@ public class RoleServiceImpl extends BaseService implements RoleService {
 	 */
 	@Override
 	public List<TreeModel> queryRoleWFTree(String roleID) throws Exception {
-		List<ProcNode> nodeList = commonDao.findEntityList(ProcNode.class);
+		List<TreeModel> list = new ArrayList<TreeModel>();
+		TreeModel model1 = new TreeModel();
+		model1.setId("1");
+		model1.setText("调试");
+		list.add(model1);
+		TreeModel model2 = new TreeModel();
+		model2.setId("2");
+		model2.setText("故障排除");
+		list.add(model2);
+		TreeModel model3 = new TreeModel();
+		model3.setId("3");
+		model3.setText("送验");
+		list.add(model3);
+		TreeModel model4 = new TreeModel();
+		model4.setId("4");
+		model4.setText("入库");
+		list.add(model4);
+		
 		List<String> nodeIDList = roleDao.queryProcNodeIDList(roleID);
-		return TreeUtil.setTree(nodeList, nodeIDList);
+		TreeUtil.setTreeModelCheckedNode(list, nodeIDList);
+		return list;
 	}
 
 	/**

@@ -61,6 +61,8 @@ public class ProcInst implements Serializable {
 	private String repoinfo;//质检系统入库状态
 	@Transient
 	private Integer jgDay;//超期间隔天数
+	@Transient
+	private String nodeDescr;//指定环节故障描述
 	
 	public String getScdh() {
 		return scdh;
@@ -187,5 +189,11 @@ public class ProcInst implements Serializable {
 	}
 	public void setReplyCount(Integer replyCount) {
 		this.replyCount = replyCount;
+	}
+	public String getNodeDescr() {
+		return nodeDescr;
+	}
+	public void setNodeDescr(String nodeDescr) {
+		this.nodeDescr = nodeDescr;
 	}
 }
