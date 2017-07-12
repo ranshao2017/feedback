@@ -57,6 +57,7 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 		inst.setJcsj(new Date());
 		inst.setJcUsrID(loginInfo.getUserId());
 		inst.setJcUsrNam(loginInfo.getUserNam());
+		inst.setTsStatus("1");//可调车
 		
 		if(StringUtils.isNotBlank(qjData)){
 			inst.setQjFlag(EnumYesNo.yes.getCode());
@@ -78,7 +79,38 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 			inst.setCloseFlag(EnumYesNo.no.getCode());//协助部门讨论开关
 			inst.setReplyCount(0);
 		}
-		commonDao.saveEntity(inst);
+		commonDao.saveOrUpdateEntity(inst);
+	}
+	
+	@Override
+	public void saveTC(ProcInst inst, LoginInfo loginInfo, String qjData) throws Exception {
+		inst.setStatus(EnumProcNode.ts.getCode());
+		inst.setJcsj(new Date());
+		inst.setJcUsrID(loginInfo.getUserId());
+		inst.setJcUsrNam(loginInfo.getUserNam());
+		inst.setTsStatus("2");//不可调车
+		
+		if(StringUtils.isNotBlank(qjData)){
+			inst.setQjFlag(EnumYesNo.yes.getCode());
+			JSONArray array = JSON.parseArray(qjData);
+			for(int i = 0; i < array.size(); i ++){
+				JSONObject obj = (JSONObject) array.get(i);
+				QueJian qj = new QueJian();
+				qj.setId(dBUtil.getCommonId());
+				qj.setScdh(inst.getScdh());
+				qj.setWlh(obj.getString("wlh"));
+				qj.setQjs(obj.getInteger("qjs"));
+				commonDao.saveEntity(qj);
+			}
+		}else{
+			inst.setQjFlag(EnumYesNo.no.getCode());
+		}
+		
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			inst.setCloseFlag(EnumYesNo.no.getCode());//协助部门讨论开关
+			inst.setReplyCount(0);
+		}
+		commonDao.saveOrUpdateEntity(inst);
 	}
 
 	@Override
@@ -109,7 +141,7 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 			inst.setReplyCount(0);
 		}
 		
-		commonDao.saveEntity(inst);
+		commonDao.saveOrUpdateEntity(inst);
 	}
 
 	@Override
@@ -444,6 +476,13 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 		Integer lngCount = carTestDao.queryLngCount(status);
 		Integer cngCount = carTestDao.queryCngCount(status);
 		Map<String, Object> paras = new HashMap<String, Object>();
+		if(EnumProcNode.ts.getCode().equals(status)){//调试
+			Integer ktCount = carTestDao.queryKtCount(status);
+			Integer bktCount = carTestDao.queryBktCount(status);
+			paras.put("ktCount", ktCount);
+			paras.put("bktCount", bktCount);
+		}
+		
 		paras.put("ctCount", ctCount);
 		paras.put("lngCount", lngCount);
 		paras.put("cngCount", cngCount);
@@ -505,6 +544,26 @@ public class CarTestServiceImpl extends BaseService implements CarTestService {
 	@Override
 	public List<ProcInst> queryExportCT(Map<String, String> paraMap) throws Exception {
 		return carTestDao.queryExportCT(paraMap);
+	}
+
+	@Override
+	public PaiChan queryPCProcinst(String scdh) throws Exception {
+		ProcInst inst = commonDao.findEntityByID(ProcInst.class, scdh);
+		if(null != inst){
+			PaiChan pc = new PaiChan();
+			pc.setCx(inst.getCx());
+			pc.setDdh(inst.getDdh());
+			pc.setDph(inst.getDph());
+			pc.setFdj(inst.getFdj());
+			pc.setPz(inst.getPz());
+			pc.setScdh(inst.getScdh());
+			pc.setXxsj(inst.getXxsj());
+			pc.setXzOrgID(inst.getXzOrgID());
+			pc.setBz(inst.getBz());
+			pc.setDescr(inst.getDescr());
+			return pc;
+		}
+		return null;
 	}
 
 }

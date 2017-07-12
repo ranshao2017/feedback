@@ -56,6 +56,8 @@ public class ProcInst implements Serializable {
 	private String closeFlag;//是否关闭协助部门讨论
 	@Column(name = "REPLYCOUNT")
 	private Integer replyCount;//协助部门讨论数
+	@Column(name = "TSSTATUS")
+	private String tsStatus;//调试环节状态，1可调车，2不可调车
 	
 	@Transient
 	private String repoinfo;//质检系统入库状态
@@ -63,6 +65,8 @@ public class ProcInst implements Serializable {
 	private Integer jgDay;//超期间隔天数
 	@Transient
 	private String nodeDescr;//指定环节故障描述
+	@Transient
+	private String nodeCarSet;//指定环节存放车位
 	
 	public String getScdh() {
 		return scdh;
@@ -195,5 +199,17 @@ public class ProcInst implements Serializable {
 	}
 	public void setNodeDescr(String nodeDescr) {
 		this.nodeDescr = nodeDescr;
+	}
+	public String getNodeCarSet() {
+		return nodeCarSet;
+	}
+	public void setNodeCarSet(String nodeCarSet) {
+		this.nodeCarSet = nodeCarSet;
+	}
+	public String getTsStatus() {
+		return tsStatus;
+	}
+	public void setTsStatus(String tsStatus) {
+		this.tsStatus = tsStatus;
 	}
 }

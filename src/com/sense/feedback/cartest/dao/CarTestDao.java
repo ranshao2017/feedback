@@ -24,7 +24,7 @@ import com.sense.frame.pub.model.PageInfo;
 public class CarTestDao extends BaseDAO {
 
 	public PageInfo queryPCPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
-		String sql = "select pc.* from BIZ_PC pc where not exists (select 1 from BIZ_PROCINST p where pc.SCDH = p.SCDH)";
+		String sql = "select pc.* from BIZ_PC pc where not exists (select 1 from BIZ_PROCINST p where pc.SCDH = p.SCDH and p.STATUS <> '0')";
 		String scdh = paras.get("scdh");
 		String dph = paras.get("dph");
 		String ddh = paras.get("ddh");
@@ -52,8 +52,8 @@ public class CarTestDao extends BaseDAO {
 
 	public PageInfo queryCTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
 		StringBuffer sql = new StringBuffer("");
-		sql.append("select BIZ_PROCINST.*,pnode.descr as nodedescr "
-							+ "from BIZ_PROCINST left join (select MAX(scdh) scdh,MAX(PRONODE) pronode,MAX(DESCR) descr from BIZ_PROCNODE group by SCDH,PRONODE) pnode"
+		sql.append("select BIZ_PROCINST.*,pnode.descr as nodedescr,pnode.nodeCarSet "
+							+ "from BIZ_PROCINST left join (select MAX(scdh) scdh,MAX(PRONODE) pronode,MAX(DESCR) descr,MAX(CARSET) nodeCarSet from BIZ_PROCNODE group by SCDH,PRONODE) pnode"
 							+ "	   on BIZ_PROCINST.scdh = pnode.scdh and BIZ_PROCINST.status = pnode.proNode  where 1 = 1 ");
 		String status = paras.get("status");
 		if(StringUtils.isNotBlank(status)){
@@ -268,7 +268,10 @@ public class CarTestDao extends BaseDAO {
 
 	@SuppressWarnings("unchecked")
 	public List<ProcInst> queryExportCT(Map<String, String> paras) throws Exception{
-		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where 1 = 1");
+		StringBuffer sql = new StringBuffer("");
+		sql.append("select BIZ_PROCINST.*,pnode.descr as nodedescr,pnode.nodeCarSet "
+							+ "from BIZ_PROCINST left join (select MAX(scdh) scdh,MAX(PRONODE) pronode,MAX(DESCR) descr,MAX(CARSET) nodeCarSet from BIZ_PROCNODE group by SCDH,PRONODE) pnode"
+							+ "	   on BIZ_PROCINST.scdh = pnode.scdh and BIZ_PROCINST.status = pnode.proNode  where 1 = 1 ");
 		String status = paras.get("status");
 		if(StringUtils.isNotBlank(status)){
 			sql.append(" and STATUS = :status");
@@ -306,7 +309,22 @@ public class CarTestDao extends BaseDAO {
 		if(StringUtils.isNotBlank(ddh)){
 			query.setString("ddh", ddh);
 		}
-		return query.addEntity(ProcInst.class).list();
+		List<Map<String, Object>> datalist = query.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP).list();
+		return BeanUtil.getBeanListFromMap(datalist, ProcInst.class);
+	}
+
+	public Integer queryKtCount(String status) throws Exception{
+		String sql = "select count(1) num from BIZ_PROCINST where STATUS = :status and TSSTATUS = '1'";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("status", status);
+		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
+	}
+
+	public Integer queryBktCount(String status) throws Exception{
+		String sql = "select count(1) num from BIZ_PROCINST where STATUS = :status and TSSTATUS = '2'";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.setString("status", status);
+		return (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
 	}
 
 }

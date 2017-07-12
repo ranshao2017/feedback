@@ -1,5 +1,9 @@
 package com.sense.app.service.impl;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,9 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sense.app.dao.AppCTDao;
 import com.sense.app.dto.ProcInstDto;
@@ -34,6 +41,8 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
+	@Value("#{propertiesReader[FILE_PATH]}")
+	private String filePath;
 	@Autowired
 	private AppCTDao appCtDao;
 	@Autowired
@@ -78,7 +87,9 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		dto.setQjflag(procInst.getQjFlag());
 		dto.setScdh(procInst.getScdh());
 		dto.setStatus(procInst.getStatus());
-		dto.setXxsj(sdf.format(procInst.getXxsj()));
+		if(null != procInst.getXxsj()){
+			dto.setXxsj(sdf.format(procInst.getXxsj()));
+		}
 		if(StringUtils.isNotBlank(procInst.getXzOrgID())){
 			String[] orgArr = procInst.getXzOrgID().split(",");
 			StringBuffer orgSB = new StringBuffer();
@@ -121,13 +132,14 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			}
 			dto.setUsrid(node.getUsrID());
 			dto.setUsrnam(node.getUsrNam());
+			dto.setImgpath(node.getImgPath());
 			dtoList.add(dto);
 		}
 		return dtoList;
 	}
 
 	@Override
-	public void saveCT(String scdh, String carseat, String descr, String userid) throws Exception {
+	public void saveCT(String scdh, String carseat, String descr, String userid, List<MultipartFile> imgList) throws Exception {
 		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
 		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
 		if(null == node){
@@ -148,14 +160,17 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		node.setUsrID(userid);
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
 		node.setUsrNam(usr.getUsrNam());
-		commonDao.saveOrUpdateEntity(node);
+		
+		buildImg(node, imgList);
+		
+		commonDao.saveOrUpdateEntity(node);//处理图片
 		
 		proc.setProcesSta(EnumProcesSta.clbc.getCode());
 		commonDao.updateEntity(proc);
 	}
 
 	@Override
-	public void submitCT(String scdh, String carseat, String descr, String userid) throws Exception {
+	public void submitCT(String scdh, String carseat, String descr, String userid, List<MultipartFile> imgList) throws Exception {
 		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
 		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
 		if(null == node){
@@ -178,6 +193,9 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		node.setUsrID(userid);
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
 		node.setUsrNam(usr.getUsrNam());
+		
+		buildImg(node, imgList);//处理图片
+				
 		commonDao.saveOrUpdateEntity(node);
 		
 		if(EnumProcNode.sy.getCode().equals(proc.getStatus())){//记录入库时间
@@ -191,7 +209,7 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 
 	@Override
 	public void unQualiyCT(String scdh, String carseat, String descr,
-			String userid, String processta) throws Exception {
+			String userid, String processta, List<MultipartFile> imgList) throws Exception {
 		ProcInst proc = commonDao.findEntityByID(ProcInst.class, scdh);
 		ProcInstNode node = carTestDao.queryCurrenttNode(scdh, proc.getStatus());
 		if(null == node){
@@ -216,11 +234,35 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		node.setUsrID(userid);
 		Usr usr = commonDao.findEntityByID(Usr.class, userid);
 		node.setUsrNam(usr.getUsrNam());
+		buildImg(node, imgList);//处理图片
 		commonDao.saveOrUpdateEntity(node);
 		
 		commonDao.updateEntity(proc);
 	}
 
+	private void buildImg(ProcInstNode node, List<MultipartFile> imgList) throws Exception {
+		//处理图片
+		if(CollectionUtils.isNotEmpty(imgList)){
+			StringBuffer imgPathBuffer = new StringBuffer();
+			for(MultipartFile file : imgList){
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+				String origName = file.getOriginalFilename();
+				String imgPath = "appct/" + sdf.format(new Date()) + origName.substring(origName.lastIndexOf("."));
+				File aimFile = new File(filePath + imgPath);
+				if(!aimFile.getParentFile().exists()){
+					aimFile.getParentFile().mkdirs();
+				}
+				OutputStream os = new FileOutputStream(aimFile);
+				InputStream is = file.getInputStream();
+				IOUtils.copy(is, os);
+				IOUtils.closeQuietly(is);
+				IOUtils.closeQuietly(os);
+				imgPathBuffer.append(",").append(imgPath);
+			}
+			node.setImgPath(imgPathBuffer.toString().substring(1));
+		}
+	}
+	
 	@Override
 	public List<Map<String, Object>> queryQJ(String scdh) throws Exception {
 		List<QueJian> list = commonDao.findEntityList(QueJian.class, "scdh", scdh);
@@ -237,11 +279,16 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<ProcInstDto> queryCTPage(PageInfo pi, String dph, String ddh) throws Exception {
+	public List<ProcInstDto> queryCTPage(PageInfo pi, String dph, String ddh, String cx, String userid) throws Exception {
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("dph", dph);
 		paras.put("ddh", ddh);
-		pi = complexDao.queryCarTPage(pi, paras);
+		paras.put("cx", cx);
+		List<String> nodeIDs = null;
+		if(StringUtils.isNotBlank(userid)){
+			nodeIDs = appCtDao.queryOwnProcNode(userid);
+		}
+		pi = complexDao.queryCarTPage(pi, paras, nodeIDs);
 		List<ProcInst> instList = (List<ProcInst>) pi.getRows();
 		List<ProcInstDto> returnList = new ArrayList<ProcInstDto>();
 		for(ProcInst procInst : instList){
@@ -263,5 +310,14 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			returnList.add(dto);
 		}
 		return returnList;
+	}
+
+	@Override
+	public Integer queryCTTotal(String dph, String ddh, String cx, String userid) throws Exception {
+		List<String> nodeIDs = null;
+		if(StringUtils.isNotBlank(userid)){
+			nodeIDs = appCtDao.queryOwnProcNode(userid);
+		}
+		return appCtDao.queryCTTotal(dph, ddh, cx, nodeIDs);
 	}
 }

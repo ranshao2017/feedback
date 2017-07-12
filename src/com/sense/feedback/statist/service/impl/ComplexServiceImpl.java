@@ -19,7 +19,7 @@ public class ComplexServiceImpl extends BaseService implements ComplexService {
 
 	@Override
 	public PageInfo queryCarTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception {
-		return complexDao.queryCarTPage(pageInfo, paras);
+		return complexDao.queryCarTPage(pageInfo, paras, null);
 	}
 
 	@Override

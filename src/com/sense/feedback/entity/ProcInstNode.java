@@ -37,6 +37,8 @@ public class ProcInstNode implements Serializable {
 	private Date createTime;//该环节产生时间
 	@Column(name = "SUBMITTIME")
 	private Date submitTime;//提交至下一环节时间时间
+	@Column(name = "IMGPATH")
+	private String imgPath;//图片路径，多张图片用逗号分隔
 	
 	public String getId() {
 		return id;
@@ -97,5 +99,11 @@ public class ProcInstNode implements Serializable {
 	}
 	public void setSubmitTime(Date submitTime) {
 		this.submitTime = submitTime;
+	}
+	public String getImgPath() {
+		return imgPath;
+	}
+	public void setImgPath(String imgPath) {
+		this.imgPath = imgPath;
 	}
 }

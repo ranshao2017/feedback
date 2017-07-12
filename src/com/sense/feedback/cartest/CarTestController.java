@@ -35,6 +35,7 @@ import com.sense.feedback.enumdic.EnumYesNo;
 import com.sense.frame.base.BaseController;
 import com.sense.frame.base.BusinessException;
 import com.sense.frame.pub.model.PageInfo;
+import com.sense.sys.dic.DicLoader;
 
 @Controller
 @RequestMapping("/cartest")
@@ -42,6 +43,8 @@ public class CarTestController extends BaseController {
 	
 	@Autowired
 	private CarTestService carTestService;
+	@Autowired
+	private DicLoader dicLoader;
 	
 	/**
 	 * 接车下线页面
@@ -67,7 +70,13 @@ public class CarTestController extends BaseController {
 	@RequestMapping("/forwardPickCar")
 	public String forwardPickCar(HttpServletRequest request, ModelMap map) throws Exception {
 		String scdh = request.getParameter("scdh");
-		PaiChan pc = carTestService.queryPCDetail(scdh);
+		PaiChan pc = carTestService.queryPCProcinst(scdh);
+		if(null == pc){
+			pc = carTestService.queryPCDetail(scdh);
+		}else{
+			String qjJson = carTestService.queryQJData(scdh);
+			map.put("qjJson", qjJson);
+		}
 		String pcJson = JSON.toJSONStringWithDateFormat(pc, "yyyy-MM-dd HH:mm:ss");
 		map.put("pcJson", pcJson);
 		return "cartest/pickcar";
@@ -84,7 +93,7 @@ public class CarTestController extends BaseController {
 	}
 	
 	/**
-	 * 下线提交至调车
+	 * 下线可调至调车
 	 */
 	@RequestMapping("/submitTC")
 	@ResponseBody
@@ -95,6 +104,21 @@ public class CarTestController extends BaseController {
 		}
 		String qjData = request.getParameter("qjData");
 		carTestService.submitTC(inst, getLoginInfo(request), qjData);
+		return this.writeSuccMsg("已提交至调车");
+	}
+	
+	/**
+	 * 下线不可调至调车
+	 */
+	@RequestMapping("/saveTC")
+	@ResponseBody
+	public Map<String, Object> saveTC(HttpServletRequest request, @Valid ProcInst inst) throws Exception {
+		if(StringUtils.isNotBlank(inst.getXzOrgID())){
+			String xzOrg = inst.getXzOrgID().replaceAll("-", ",");
+			inst.setXzOrgID(xzOrg);
+		}
+		String qjData = request.getParameter("qjData");
+		carTestService.saveTC(inst, getLoginInfo(request), qjData);
 		return this.writeSuccMsg("已提交至调车");
 	}
 	
@@ -114,7 +138,7 @@ public class CarTestController extends BaseController {
 	}
 	
 	/**
-	 * 缺件不可调车
+	 * 保存接车信息
 	 */
 	@RequestMapping("/saveXx")
 	@ResponseBody
@@ -125,7 +149,7 @@ public class CarTestController extends BaseController {
 			inst.setXzOrgID(xzOrg);
 		}
 		carTestService.saveXx(inst, getLoginInfo(request), qjData);
-		return this.writeSuccMsg("已保存缺件不可调车");
+		return this.writeSuccMsg("已保存接车信息");
 	}
 	
 	/**
@@ -402,7 +426,7 @@ public class CarTestController extends BaseController {
 	@RequestMapping("/forwardXzTC")
 	public String forwardXzTC(HttpServletRequest request, ModelMap map) throws Exception {
 		boolean tsOrg = carTestService.queryTsFlag(getLoginInfo(request).getOrgId());
-		map.put("tsOrg", tsOrg);
+		map.put("tsOrg", tsOrg);//调试班组可以关闭回复
 		if(!tsOrg){
 			map.put("xzOrgID", getLoginInfo(request).getOrgId());
 		}
@@ -491,7 +515,7 @@ public class CarTestController extends BaseController {
         WritableWorkbook workbook = Workbook.createWorkbook(os);//创建工作薄
         WritableSheet sheet = workbook.createSheet(EnumProcNode.getLabelByCode(paraMap.get("status")) + "记录", 0);//创建新的一页
         //创建要显示的内容,创建一个单元格，第一个参数为列坐标，第二个参数为行坐标，第三个参数为内容
-        String[] titleArr = new String[] {"底盘号", "随车单号", "车型", "订单号", "下线时间", "发动机", "配置", "是否缺件", "备注"};
+        String[] titleArr = new String[] {"底盘号", "随车单号", "车型", "订单号", "下线时间", "发动机", "配置", "是否缺件", "备注", "故障描述", "存放车位"};
         for (int i = 0; i < titleArr.length; i++) {
         	Label title = new Label(i, 0, titleArr[i]);
             sheet.addCell(title);
@@ -512,6 +536,8 @@ public class CarTestController extends BaseController {
             sheet.addCell(new Label(6, i + 1, inst.getPz()));
             sheet.addCell(new Label(7, i + 1, EnumYesNo.getLabelByCode(inst.getQjFlag())));
             sheet.addCell(new Label(8, i + 1, inst.getBz()));
+            sheet.addCell(new Label(9, i + 1, inst.getNodeDescr()));
+            sheet.addCell(new Label(10, i + 1, dicLoader.getCacheDicName("CARSEAT", inst.getNodeCarSet())));
         }
         
         workbook.write();

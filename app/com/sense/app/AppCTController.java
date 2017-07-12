@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sense.app.dto.ProcInstDto;
@@ -76,12 +78,13 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/saveCT")
 	@ResponseBody
-	public Map<String, Object> saveCT(String scdh, String carseat, String descr, String userid) {
+	public Map<String, Object> saveCT(String scdh, String carseat, String descr, String userid, MultipartHttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
+		List<MultipartFile> imgList = request.getFiles("proimgfile");
 		try {
-			appCTService.saveCT(scdh, carseat, descr, userid);
+			appCTService.saveCT(scdh, carseat, descr, userid, imgList);
 		} catch (Exception e) {
 			log.error("整车调试保存接口异常", e);
 			return AppJsonUtil.writeErr("整车调试保存接口异常");
@@ -94,12 +97,13 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/submitCT")
 	@ResponseBody
-	public Map<String, Object> submitCT(String scdh, String carseat, String descr, String userid) {
+	public Map<String, Object> submitCT(String scdh, String carseat, String descr, String userid, MultipartHttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
+		List<MultipartFile> imgList = request.getFiles("proimgfile");
 		try {
-			appCTService.submitCT(scdh, carseat, descr, userid);
+			appCTService.submitCT(scdh, carseat, descr, userid, imgList);
 		} catch (Exception e) {
 			log.error("整车调试提交接口异常", e);
 			return AppJsonUtil.writeErr("整车调试提交接口异常");
@@ -112,12 +116,13 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/unQualiyCT")
 	@ResponseBody
-	public Map<String, Object> unQualiyCT(String scdh, String carseat, String descr, String userid, String processta) {
+	public Map<String, Object> unQualiyCT(String scdh, String carseat, String descr, String userid, String processta, MultipartHttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid) || StringUtils.isBlank(processta)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
+		List<MultipartFile> imgList = request.getFiles("proimgfile");
 		try {
-			appCTService.unQualiyCT(scdh, carseat, descr, userid, processta);
+			appCTService.unQualiyCT(scdh, carseat, descr, userid, processta, imgList);
 		} catch (Exception e) {
 			log.error("整车调试提交接口异常", e);
 			return AppJsonUtil.writeErr("整车调试提交接口异常");
@@ -149,14 +154,16 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/queryCTPage")
 	@ResponseBody
-	public Map<String, Object> queryCTPage(int pagerow, int pagesize, String dph, String ddh) {
+	public Map<String, Object> queryCTPage(int pagerow, int pagesize, String dph, String ddh, String cx, String userid) {
 		try{
 			PageInfo pi = new PageInfo();
 			pi.setPageSize(pagerow);
 			pi.setPageNumber(pagesize);
-			List<ProcInstDto> list = appCTService.queryCTPage(pi, dph, ddh);
+			List<ProcInstDto> list = appCTService.queryCTPage(pi, dph, ddh, cx, userid);
 			Map<String, Object> paraMap = new HashMap<String, Object>();
 			paraMap.put("returnlist", list);
+			Integer totalCount = appCTService.queryCTTotal(dph, ddh, cx, userid);
+			paraMap.put("total", totalCount);
 			return AppJsonUtil.writeSucc("操作成功", paraMap);
 		}catch(Exception e){
 			log.error("查看在调车辆列表", e);

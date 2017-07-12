@@ -1,7 +1,9 @@
 package com.sense.feedback.statist.dao;
 
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.type.IntegerType;
@@ -16,8 +18,18 @@ import com.sense.frame.pub.model.PageInfo;
 @Component
 public class ComplexDao extends BaseDAO {
 
-	public PageInfo queryCarTPage(PageInfo pageInfo, Map<String, String> paras) throws Exception{
+	public PageInfo queryCarTPage(PageInfo pageInfo, Map<String, String> paras, List<String> nodeIDs) throws Exception{
 		StringBuffer sql = new StringBuffer("select * from BIZ_PROCINST where STATUS not in ('0', '4') ");
+		if(CollectionUtils.isNotEmpty(nodeIDs)){
+			sql.append(" and STATUS in (");
+			for(int i = 0; i < nodeIDs.size(); i ++){
+				if(i > 0){
+					sql.append(",");
+				}
+				sql.append("'").append(nodeIDs.get(i)).append("'");
+			}
+			sql.append(")");
+		}
 		String dph = paras.get("dph");
 		if(StringUtils.isNotBlank(dph)){
 			if(dph.length() == 5){
@@ -30,6 +42,10 @@ public class ComplexDao extends BaseDAO {
 		if(StringUtils.isNotBlank(ddh)){
 			sql.append(" and DDH = :ddh");
 		}
+		String cx = paras.get("cx");
+		if(StringUtils.isNotBlank(cx)){
+			sql.append(" and CX = :cx");
+		}
 		sql.append(" order by STATUS");
 		SQLEntity entity = new SQLEntity(sql.toString());
 		if(StringUtils.isNotBlank(dph)){
@@ -41,6 +57,9 @@ public class ComplexDao extends BaseDAO {
 		}
 		if(StringUtils.isNotBlank(ddh)){
 			entity.setObject("ddh", ddh);
+		}
+		if(StringUtils.isNotBlank(cx)){
+			entity.setObject("cx", cx);
 		}
 		return executePageQuery(pageInfo, entity, ProcInst.class);
 	}

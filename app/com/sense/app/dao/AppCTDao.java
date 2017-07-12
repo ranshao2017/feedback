@@ -3,8 +3,10 @@ package com.sense.app.dao;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.type.IntegerType;
 import org.springframework.stereotype.Component;
 
 import com.sense.feedback.entity.ProcInst;
@@ -65,6 +67,49 @@ public class AppCTDao extends BaseDAO {
 		SQLQuery query = getCurrentSession().createSQLQuery(sql);
 		query.setString("userid", userid);
 		return query.list();
+	}
+
+	public Integer queryCTTotal(String dph, String ddh, String cx, List<String> nodeIDs) throws Exception{
+		StringBuffer sql = new StringBuffer("select count(1) num from BIZ_PROCINST where STATUS not in ('0', '4') ");
+		if(CollectionUtils.isNotEmpty(nodeIDs)){
+			sql.append(" and STATUS in (");
+			for(int i = 0; i < nodeIDs.size(); i ++){
+				if(i > 0){
+					sql.append(",");
+				}
+				sql.append("'").append(nodeIDs.get(i)).append("'");
+			}
+			sql.append(")");
+		}
+		if(StringUtils.isNotBlank(dph)){
+			if(dph.length() == 5){
+				sql.append(" and DPH like :dph");
+			}else{
+				sql.append(" and DPH = :dph");
+			}
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			sql.append(" and DDH = :ddh");
+		}
+		if(StringUtils.isNotBlank(cx)){
+			sql.append(" and CX = :cx");
+		}
+		SQLQuery query = getCurrentSession().createSQLQuery(sql.toString());
+		if(StringUtils.isNotBlank(dph)){
+			if(dph.length() == 5){
+				query.setString("dph", "%" + dph + "%");
+			}else{
+				query.setString("dph", dph);
+			}
+		}
+		if(StringUtils.isNotBlank(ddh)){
+			query.setString("ddh", ddh);
+		}
+		if(StringUtils.isNotBlank(cx)){
+			query.setString("cx", cx);
+		}
+		int count = (Integer) query.addScalar("num", IntegerType.INSTANCE).uniqueResult();
+		return count;
 	}
 
 }

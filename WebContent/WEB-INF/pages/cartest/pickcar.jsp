@@ -38,20 +38,29 @@
 		</div>
 	</div>
 	<div region="south" style="text-align:center;padding:3px;">
+		<a class="easyui-linkbutton" onClick="saveXx(this);" iconCls="icon-save">保 存</a>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a class="easyui-linkbutton" onClick="submitTC(this);" iconCls="icon-ok">调 车</a>
 		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-		<a class="easyui-linkbutton" onClick="saveXx(this);" iconCls="icon-exclam">缺件不可调车</a>
+		<a class="easyui-linkbutton" onClick="saveTC(this);" iconCls="icon-exclam">缺件不可调车</a>
 	</div>
 </body>
 <script type="text/javascript">
 	var pageProc = eval(${pcJson});
+	var pageQJ = '${qjJson}';
 	
 	$(document).ready(function() {
 		$("#formPickCar").form('setData', pageProc);
 		$('#tabspick').tabs('keyDownTab');
 		setInterval('saveCookie()', 30000);
-		if($.cookie('pickcar')){
+		if($.cookie('pickcar') && !pageProc.descr){
 			$("#gzms").val($.cookie('pickcar'));
+		}
+		if(pageQJ){
+			$("#qj_DG").datagrid("loadData", JSON.parse(pageQJ));
+		}
+		if(pageProc.xzOrgID){
+			$("#orgCombotree").combotree('setValues',pageProc.xzOrgID.split(","));
 		}
 	});
 	
@@ -180,6 +189,23 @@
 			param.qjData = JSON.stringify(rows);
 		}
     	ctrl.operPost("${app}/cartest/submitTC.do", param, function(paraMap){
+    		parent.queryPC();
+      		parent.ctrl.closeWin();
+    	}, obj);
+	}
+	
+	function saveTC(obj){
+		var valid = $("#formPickCar").form("validate");
+    	if(!valid) return;
+		if (editRow != undefined) {
+            $("#qj_DG").datagrid('endEdit', editRow);
+        }
+		var param = $("#formPickCar").form("getData");
+		var rows = $("#qj_DG").datagrid('getRows');
+		if(rows && '' != rows){
+			param.qjData = JSON.stringify(rows);
+		}
+    	ctrl.operPost("${app}/cartest/saveTC.do", param, function(paraMap){
     		parent.queryPC();
       		parent.ctrl.closeWin();
     	}, obj);

@@ -18,6 +18,8 @@ public interface CarTestService {
 	public ProcInst queryProcInst(String scdh) throws Exception;
 
 	public void submitTC(ProcInst inst, LoginInfo loginInfo, String qjData) throws Exception;
+	
+	public void saveTC(ProcInst inst, LoginInfo loginInfo, String qjData) throws Exception;
 
 	public void saveXx(ProcInst inst, LoginInfo loginInfo, String qjData) throws Exception;
 
@@ -64,5 +66,7 @@ public interface CarTestService {
 	public void closeReply(String scdh) throws Exception;
 
 	public List<ProcInst> queryExportCT(Map<String, String> paraMap) throws Exception;
+
+	public PaiChan queryPCProcinst(String scdh) throws Exception;
 
 }

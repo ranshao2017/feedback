@@ -97,6 +97,11 @@
 				width : 100,
 				title : "故障描述"
 			},{
+				field : "nodeCarSet",
+				width : 100,
+				title : "存放车位",
+				formatter:ctrl.dicConvert('CARSEAT')
+			},{
 				field : "bz",
 				width : 100,
 				title : "备注"
@@ -124,13 +129,19 @@
 				}
 			},
 			rowStyler : function (index, row){
-	    		if(row.procesSta == '1'){
-	    			return "color:blue;";
-	    		}else if(row.procesSta == '2'){
-	    			return "color:#FF0000";
-	    		}else if(row.procesSta == '3'){
-	    			return "color:#D52B2B";
-	    		}
+				if('1' == row.status){
+					if('2' == row.tsStatus){
+						return "color:red";
+					}
+				}else{
+					if(row.procesSta == '1'){
+		    			return "color:blue;";
+		    		}else if(row.procesSta == '2'){
+		    			return "color:#FF0000";
+		    		}else if(row.procesSta == '3'){
+		    			return "color:#D52B2B";
+		    		}
+				}
 	    	}
 		});
 		
@@ -144,9 +155,13 @@
 	    $('#pc_DG').datagrid("clearSelections");
 	    
 	    ctrl.operPost("${app}/cartest/queryCTCount.do", $("#queryForm").form("getData"), function(paraMap){
-	    	 $("#total_span").text('总计 ' + paraMap.ctCount + 
-	    			 " 条 （LNG " + paraMap.lngCount + " 条，CNG " + paraMap.cngCount + " 条，非天然气 " + 
-	    			 (paraMap.ctCount - paraMap.lngCount - paraMap.cngCount) + " 条）");
+	    	var textT = '总计 ' + paraMap.ctCount + 
+			 " 条 （LNG " + paraMap.lngCount + " 条，CNG " + paraMap.cngCount + " 条，非天然气 " + 
+			 (paraMap.ctCount - paraMap.lngCount - paraMap.cngCount) + " 条）";
+	    	if('${status }' == '1'){
+	    		textT += "  可调车 " + paraMap.ktCount + " 条，不可调车 " + paraMap.bktCount + " 条";
+	    	}
+	    	 $("#total_span").text(textT);
 	    });
 	}
 	

@@ -12,6 +12,7 @@ public class ProcInstNodeDto implements Serializable {
 	private String pronode;//环节
 	private String scdh;//随车单号
 	private String descr;//描述
+	private String imgpath;//图片路径
 	private String carset;//存放车位
 	private String usrid;//用户ID
 	private String usrnam;//用户名称
@@ -78,5 +79,11 @@ public class ProcInstNodeDto implements Serializable {
 	}
 	public void setCreatetime(String createtime) {
 		this.createtime = createtime;
+	}
+	public String getImgpath() {
+		return imgpath;
+	}
+	public void setImgpath(String imgpath) {
+		this.imgpath = imgpath;
 	}
 }
