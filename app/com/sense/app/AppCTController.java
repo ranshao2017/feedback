@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartRequest;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sense.app.dto.ProcInstDto;
@@ -78,11 +80,16 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/saveCT")
 	@ResponseBody
-	public Map<String, Object> saveCT(String scdh, String carseat, String descr, String userid, MultipartHttpServletRequest request) {
+	public Map<String, Object> saveCT(String scdh, String carseat, String descr, String userid, HttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
-		List<MultipartFile> imgList = request.getFiles("proimgfile");
+		List<MultipartFile> imgList = null;
+		try{
+			imgList = ((MultipartRequest) request).getFiles("ctfile");
+		}catch(Exception e){
+			log.error("请求未指定 MultipartRequest 类型", e);
+		}
 		try {
 			appCTService.saveCT(scdh, carseat, descr, userid, imgList);
 		} catch (Exception e) {
@@ -97,11 +104,16 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/submitCT")
 	@ResponseBody
-	public Map<String, Object> submitCT(String scdh, String carseat, String descr, String userid, MultipartHttpServletRequest request) {
+	public Map<String, Object> submitCT(String scdh, String carseat, String descr, String userid, HttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
-		List<MultipartFile> imgList = request.getFiles("proimgfile");
+		List<MultipartFile> imgList = null;
+		try{
+			imgList = ((MultipartRequest) request).getFiles("ctfile");
+		}catch(Exception e){
+			log.error("请求未指定 MultipartRequest 类型", e);
+		}
 		try {
 			appCTService.submitCT(scdh, carseat, descr, userid, imgList);
 		} catch (Exception e) {
@@ -116,11 +128,16 @@ public class AppCTController extends BaseController {
 	 */
 	@RequestMapping("/unQualiyCT")
 	@ResponseBody
-	public Map<String, Object> unQualiyCT(String scdh, String carseat, String descr, String userid, String processta, MultipartHttpServletRequest request) {
+	public Map<String, Object> unQualiyCT(String scdh, String carseat, String descr, String userid, String processta, HttpServletRequest request) {
 		if(StringUtils.isBlank(scdh) || StringUtils.isBlank(userid) || StringUtils.isBlank(processta)){
 			return AppJsonUtil.writeErr("参数不合法");
 		}
-		List<MultipartFile> imgList = request.getFiles("proimgfile");
+		List<MultipartFile> imgList = null;
+		try{
+			imgList = ((MultipartRequest) request).getFiles("ctfile");
+		}catch(Exception e){
+			log.error("请求未指定 MultipartRequest 类型", e);
+		}
 		try {
 			appCTService.unQualiyCT(scdh, carseat, descr, userid, processta, imgList);
 		} catch (Exception e) {

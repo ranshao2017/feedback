@@ -80,7 +80,9 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 		dto.setDescr(procInst.getDescr());
 		dto.setDph(procInst.getDph());
 		dto.setFdj(procInst.getFdj());
-		dto.setJcsj(sdf.format(procInst.getJcsj()));
+		if(null != procInst.getJcsj()){
+			dto.setJcsj(sdf.format(procInst.getJcsj()));
+		}
 		dto.setJcusrid(procInst.getJcUsrID());
 		dto.setJcusrnam(procInst.getJcUsrNam());
 		dto.setPz(procInst.getPz());
@@ -299,14 +301,18 @@ public class AppCTServiceImpl extends BaseService implements AppCTService {
 			dto.setDescr(procInst.getDescr());
 			dto.setDph(procInst.getDph());
 			dto.setFdj(procInst.getFdj());
-			dto.setJcsj(sdf.format(procInst.getJcsj()));
+			if(null != procInst.getJcsj()){
+				dto.setJcsj(sdf.format(procInst.getJcsj()));
+			}
 			dto.setJcusrid(procInst.getJcUsrID());
 			dto.setJcusrnam(procInst.getJcUsrNam());
 			dto.setPz(procInst.getPz());
 			dto.setQjflag(procInst.getQjFlag());
 			dto.setScdh(procInst.getScdh());
 			dto.setStatus(procInst.getStatus());
-			dto.setXxsj(sdf.format(procInst.getXxsj()));
+			if(null != procInst.getXxsj()){
+				dto.setXxsj(sdf.format(procInst.getXxsj()));
+			}
 			returnList.add(dto);
 		}
 		return returnList;
