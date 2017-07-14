@@ -1,6 +1,7 @@
 package com.sense.feedback.notice.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sense.feedback.entity.Notice;
 import com.sense.frame.pub.global.LoginInfo;
@@ -9,7 +10,7 @@ import com.sense.frame.pub.model.TreeModel;
 
 public interface NoticeService {
 
-	public PageInfo queryNoticeWithPage(PageInfo pageInfo, LoginInfo loginInfo) throws Exception;
+	public PageInfo queryNoticeWithPage(PageInfo pageInfo, LoginInfo loginInfo, Map<String,String> paras) throws Exception;
 
 	public void addNotice(Notice notice, LoginInfo loginInfo) throws Exception;
 

@@ -29,6 +29,8 @@ public class Notice implements Serializable{
 	private String createUsrName;//创建人姓名 
 	@Column(name = "BODY")
 	private String body;//通知内容
+	@Column(name = "NOTICETYPE")
+	private String noticeType;//通知类型
 	
 	@Transient
 	private String reveciveUsrIDs;
@@ -82,5 +84,11 @@ public class Notice implements Serializable{
 	}
 	public void setIsRead(String isRead) {
 		this.isRead = isRead;
+	}
+	public String getNoticeType() {
+		return noticeType;
+	}
+	public void setNoticeType(String noticeType) {
+		this.noticeType = noticeType;
 	}
 }

@@ -8,6 +8,7 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class NoticeDto implements Serializable{
 	private String id;//通知ID
+	private String noticetype;//通知类型
 	private String topic;//标题
 	private String createdate;//创建时间
 	private String createusrid;//创建人
@@ -56,5 +57,11 @@ public class NoticeDto implements Serializable{
 	}
 	public void setIsread(String isread) {
 		this.isread = isread;
+	}
+	public String getNoticetype() {
+		return noticetype;
+	}
+	public void setNoticetype(String noticetype) {
+		this.noticetype = noticetype;
 	}
 }

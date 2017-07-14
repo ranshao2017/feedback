@@ -11,6 +11,13 @@
 <div id="tt" class="easyui-tabs" fit="true">
 	<div title="查询" fit="true">
 		<div class="easyui-layout" fit="true">
+			<div region="north" border="false">
+				<form id="queryForm" columns='3' class="easyui-form">
+					<input title="通知类型" name="noticeType" syscode="NOTICETYPE" class="easyui-combobox" rootflag="root" panelHeight="auto"/>
+					<input title="标题" name="topic"/>
+					<a class="easyui-linkbutton" plain="true" href="javascript:void(0)" iconCls="icon-search" onclick="queryNotice()">检索</a>
+				</form>
+			</div>
 			<div region="center" border="false">
 			    <div id="tb">
 		           	<div class="perm-panel" >
@@ -53,6 +60,11 @@
 				field : "createUsrID",
 				hidden : true
 			},{
+				field : "noticeType",
+				width : 80,
+				title : "通知类型",
+				formatter:ctrl.dicConvert('NOTICETYPE')
+			},{
 				field : "topic",
 				width : 180,
 				title : "标题"
@@ -66,6 +78,13 @@
 				title : "创建时间"
 			} ] ]
 		});
+	}
+	
+	function queryNotice(){
+		var param = $("#queryForm").form("getData");
+	    $("#notice_DG").datagrid("options").url="${app}/notice/queryNoticeWithPage.do";
+	    $('#notice_DG').datagrid("load", param);
+	    $('#notice_DG').datagrid("clearSelections");	
 	}
 	
 	function publishNotice(){
@@ -92,7 +111,7 @@
 			$.messager.alert("提示", "请先选择要查看的通知！", "info");
 			return;
 		}
-		ctrl.openWin("${app}/notice/forwardNoticeDtl.do", {'noticeID':proRow.id}, 700, 420, "查看通知");
+		ctrl.openWin("${app}/notice/forwardNoticeDtl.do", {'noticeID':proRow.id}, 800, 500, "查看通知");
 	}
 	
 	function reLoadProDG(){

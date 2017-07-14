@@ -1,7 +1,9 @@
 package com.sense.feedback.notice.dao;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.SQLQuery;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +16,25 @@ import com.sense.sys.entity.Usr;
 @Component
 public class NoticeDao extends BaseDAO {
 
-	public PageInfo queryNoticeWithPage(PageInfo pageInfo, String userId) throws Exception{
-		String sql = "select * from BIZ_NOTICE where CREATEUSRID = :userId order by CREATEDATE desc";
-		SQLEntity entity = new SQLEntity(sql);
+	public PageInfo queryNoticeWithPage(PageInfo pageInfo, String userId, Map<String,String> paras) throws Exception{
+		String noticeType = paras.get("noticeType");
+		String topic = paras.get("topic");
+		StringBuffer sql = new StringBuffer("select * from BIZ_NOTICE where CREATEUSRID = :userId ");
+		if(StringUtils.isNotBlank(noticeType)){
+			sql.append(" and NOTICETYPE = :noticeType");
+		}
+		if(StringUtils.isNotBlank(topic)){
+			sql.append(" and TOPIC like :topic");
+		}
+		sql.append(" order by CREATEDATE desc");
+		SQLEntity entity = new SQLEntity(sql.toString());
 		entity.setObject("userId", userId);
+		if(StringUtils.isNotBlank(noticeType)){
+			entity.setObject("noticeType", noticeType);
+		}
+		if(StringUtils.isNotBlank(topic)){
+			entity.setObject("topic", "%" + topic + "%");
+		}
 		return executePageQuery(pageInfo, entity, Notice.class);
 	}
 

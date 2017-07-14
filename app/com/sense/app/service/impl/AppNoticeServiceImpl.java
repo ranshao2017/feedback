@@ -14,12 +14,15 @@ import com.sense.app.service.AppNoticeService;
 import com.sense.feedback.entity.Notice;
 import com.sense.frame.base.BaseService;
 import com.sense.frame.pub.model.PageInfo;
+import com.sense.sys.dic.DicLoader;
 
 @Service
 public class AppNoticeServiceImpl extends BaseService implements AppNoticeService {
 
 	@Autowired
 	private AppNoticeDao appNoticeDao;
+	@Autowired
+	private DicLoader dicLoader;
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	@SuppressWarnings("unchecked")
@@ -32,6 +35,7 @@ public class AppNoticeServiceImpl extends BaseService implements AppNoticeServic
 			for(Notice notice : noticeList){
 				NoticeDto dto = new NoticeDto();
 				dto.setId(notice.getId());
+				dto.setNoticetype(dicLoader.getCacheDicName("NOTICETYPE", notice.getNoticeType()));
 				dto.setBody(notice.getBody());
 				dto.setCreatedate(sdf.format(notice.getCreateDate()));
 				dto.setCreateusrid(notice.getCreateUsrID());

@@ -40,7 +40,7 @@ public class NoticeController extends BaseController {
 	@RequestMapping("/queryNoticeWithPage")
 	@ResponseBody     
 	public PageInfo queryNoticeWithPage(HttpServletRequest request)throws Exception{	
-		return noticeService.queryNoticeWithPage(getPageInfo(request), getLoginInfo(request));
+		return noticeService.queryNoticeWithPage(getPageInfo(request), getLoginInfo(request), getRequestPara(request));
 	}
 	
 	/**

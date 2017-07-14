@@ -6,21 +6,27 @@
 <title>发布通知</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <%@ include file="/commons/head.jspf"%>
+<!-- 配置文件 -->
+<script type="text/javascript" src="${app }/static/ueditor/ueditor.config.js"></script>
+<!-- 编辑器源码文件 -->
+<script type="text/javascript" src="${app }/static/ueditor/ueditor.all.js"></script>
 </head>
 <body class="easyui-layout">
 	<div region="center" border="false">
 		<div class="easyui-layout" fit='true'>
-			<div region="west" border="false" style="width:400px;">
+			<div region="west" border="false" style="width:500px;">
 				<form id="formNotice" columns='1' class="easyui-form">
+					<input title="通知类型" name="noticeType" type="text" syscode="NOTICETYPE" class="easyui-combobox" required="true" style="width:300px;"/>
 		      		<input title="标题" name="topic" type="text" class="easyui-validatebox" required="true" style="width:300px;"/>
-		      		<textarea title="内容" name="body" rows="18" class="easyui-validatebox" required="true" style="width:300px;"></textarea>
+		      		<!-- <textarea title="内容" name="body" rows="18" class="easyui-validatebox" required="true" style="width:300px;"></textarea> -->
+		      		<script id="container" name="body" type="text/plain"></script>
 		    	</form>
 			</div>
 			<div region="center" border="false" title="选择接收人" class="htborder-left">
 				<div class="easyui-layout" fit="true">
 					<div region="center">
 						<div class="easyui-layout" fit="true">
-							<div region="west" border="false" style="width:200px;">
+							<div region="west" border="false" style="width:120px;">
 							   <ul id="usr_orgTree" class="easyui-tree"></ul>
 							</div>
 							<div region="center" border="false" class="htborder-left">
@@ -33,7 +39,7 @@
 							</div>
 						</div>
 					</div>
-					<div region="east" class="htborder-left" title="已选接收人【双击移除】" style="width:200px;">
+					<div region="east" class="htborder-left" title="已选接收人【双击移除】" style="width:160px;">
 						<table id="choose_dGUsr"></table>
 					</div>
 				</div>
@@ -45,6 +51,12 @@
   	</div>
 </body>
 <script type="text/javascript">
+
+	var ue = UE.getEditor('container',{
+		initialFrameWidth : 400,
+	    initialFrameHeight: 260
+	});
+	
 	$("#usr_orgTree").tree({
 		lines :true,
 		url : "${app}/sys/org/queryAllOrgTree.do",
@@ -68,16 +80,15 @@
 		frozenColumns:[[{field:'ck',checkbox:true}]],
 		columns : [ [  {
 			field : "usrID",
-			width : 80,
 			title : "用户ID",
 			hidden : true
 		},{
 			field : "usrNam",
-			width : 60,
+			width : 50,
 			title : "姓名"
 		},{
 			field : "pstNam",
-			width : 120,
+			width : 40,
 			title : "岗位"
 		}] ]
 	});
@@ -151,6 +162,7 @@
     	//保存之前需要前台校验
     	var valid = $("#formNotice").form("validate");
     	if(!valid) return;
+    	ue.sync("formNotice");
     	var param = $("#formNotice").form("getData");
     	param.reveciveUsrIDs = chUsrArr.join(",");
     	ctrl.operPost("${app}/notice/addNotice.do", param, function(paraMap){}, obj);    

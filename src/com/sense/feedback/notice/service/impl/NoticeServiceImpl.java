@@ -34,8 +34,8 @@ public class NoticeServiceImpl extends BaseService implements NoticeService {
 	private UserDao userDao;
 
 	@Override
-	public PageInfo queryNoticeWithPage(PageInfo pageInfo, LoginInfo loginInfo) throws Exception {
-		return noticeDao.queryNoticeWithPage(pageInfo, loginInfo.getUserId());
+	public PageInfo queryNoticeWithPage(PageInfo pageInfo, LoginInfo loginInfo, Map<String,String> paras) throws Exception {
+		return noticeDao.queryNoticeWithPage(pageInfo, loginInfo.getUserId(), paras);
 	}
 
 	@Override

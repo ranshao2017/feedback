@@ -44,23 +44,37 @@ public class JdPush {
     	for(Entry<String, List<String>> entry : clientMap.entrySet()){
     		Builder builder = PushPayload.newBuilder();
         	builder.setPlatform(Platform.all());
-    		builder.setAudience(Audience.registrationId(entry.getValue()));
     		Map<String, String> extras = new HashMap<String, String>();
     		if("android".equals(entry.getKey())){
-    			builder.setNotification(Notification.android(content, title, extras));
+    			for(String registrationID : entry.getValue()){
+    				builder.setAudience(Audience.registrationId(registrationID));
+    				builder.setNotification(Notification.android(content, title, extras));
+    				PushPayload payload = builder.build();
+    				try {
+    					jpushClient.sendPush(payload);
+    				} catch (APIConnectionException e) {
+    					logger.error("推送消息连接异常", e);
+    				} catch (APIRequestException e) {
+    					logger.error("推送消息异常", e);
+    				}
+    			}
     		}else if("ios".equals(entry.getKey())){
-    			builder.setNotification(Notification.ios(title + ":" + content, extras));
+    			for(String registrationID : entry.getValue()){
+    				builder.setAudience(Audience.registrationId(registrationID));
+    				builder.setNotification(Notification.ios(title + ":" + content, extras));
+    				PushPayload payload = builder.build();
+    				try {
+    					jpushClient.sendPush(payload);
+    				} catch (APIConnectionException e) {
+    					logger.error("推送消息连接异常", e);
+    				} catch (APIRequestException e) {
+    					logger.error("推送消息异常", e);
+    				}
+    			}
     		}else if("winphone".equals(entry.getKey())){
     			builder.setNotification(Notification.winphone(title + ":" + content, extras));
     		}
-    		PushPayload payload = builder.build();
-			try {
-				jpushClient.sendPush(payload);
-			} catch (APIConnectionException e) {
-				logger.error("推送消息连接异常", e);
-			} catch (APIRequestException e) {
-				logger.error("推送消息异常", e);
-			}
+    		
     	}
     }
     
